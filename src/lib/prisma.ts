@@ -15,3 +15,16 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+
+
+import type { Prisma } from "@prisma/client";
+
+type ModelNames = Prisma.ModelName; // "User" | "Post"
+
+export type PrismaModels = {
+  [M in ModelNames]: Exclude<
+      Awaited<ReturnType<PrismaClient[Uncapitalize<M>]["findUnique"]>>,
+      null
+  >;
+};
+
