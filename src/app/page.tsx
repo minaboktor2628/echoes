@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CreatePost } from "@/components/example/create-post";
 import { getServerAuthSession } from "@/server/auth";
 import { api } from "@/trpc/server";
-import {useSession} from "next-auth/react";
+// import {useSession} from "next-auth/react";
 
 export default async function Home() {
   const hello = await api.post.hello({ text: "from tRPC" });
