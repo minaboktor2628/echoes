@@ -6,9 +6,9 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import GithubProvider from "next-auth/providers/github";
-
 import { env } from "@/env";
-import { prisma } from "@/lib/prisma";
+import {prisma, PrismaModels} from "@/lib/prisma";
+
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -16,19 +16,20 @@ import { prisma } from "@/lib/prisma";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
+
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
       // ...other properties
-      // role: UserRole;
+      role: "user" | "admin";
     } & DefaultSession["user"];
   }
+  interface User {
+    // ...other properties
+    role: "user" | "admin";
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  }
 }
 
 /**
