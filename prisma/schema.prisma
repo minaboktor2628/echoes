@@ -1,22 +1,24 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-  // Further reading:
-  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
   url      = env("DATABASE_URL")
 }
 
 enum Role {
   user
   admin
+}
+
+model Like {
+  userId String
+  postId Int
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
 }
 
 model User {
@@ -28,19 +30,29 @@ model User {
   role          Role      @default(user)
   accounts      Account[]
   sessions      Session[]
-  posts         Post[]
+
+  posts    Post[]
+  likes    Like[]
+  mentions Post[] @relation("Mentions")
+
+  followers User[] @relation("Followers")
+  follows   User[] @relation("Followers")
 }
 
 model Post {
   id        Int      @id @default(autoincrement())
-  name      String
+  content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById String
 
-  @@index([name])
+  mentions       User?   @relation("Mentions", fields: [mentionsUserId], references: [id])
+  mentionsUserId String?
+  likes          Like[]
+
+  @@index([content])
 }
 
 // Necessary for Next auth

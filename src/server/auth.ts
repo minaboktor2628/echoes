@@ -7,8 +7,7 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import GithubProvider from "next-auth/providers/github";
 import { env } from "@/env";
-import {prisma, PrismaModels} from "@/lib/prisma";
-
+import { prisma } from "@/lib/prisma";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -28,7 +27,6 @@ declare module "next-auth" {
   interface User {
     // ...other properties
     role: "user" | "admin";
-
   }
 }
 
@@ -50,8 +48,8 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     GithubProvider({
-      clientId: env.GITHUB_ID as string,
-      clientSecret: env.GITHUB_SECRET as string,
+      clientId: env.GITHUB_ID,
+      clientSecret: env.GITHUB_SECRET,
     }),
     /**
      * ...add more providers here.
