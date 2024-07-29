@@ -10,7 +10,6 @@ import {
 import React from "react";
 import { usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
-
 export const SideBar = () => {
   const Links = [
     {

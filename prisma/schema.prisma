@@ -14,7 +14,7 @@ enum Role {
 
 model Like {
   userId String
-  postId Int
+  postId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
@@ -40,7 +40,7 @@ model User {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -53,6 +53,7 @@ model Post {
   likes          Like[]
 
   @@index([content])
+  @@unique([createdAt, id])
 }
 
 // Necessary for Next auth
