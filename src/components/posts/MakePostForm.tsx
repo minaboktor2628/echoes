@@ -12,48 +12,27 @@ import {
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
 import { type PostFormSchema, postFormSchema } from "@/types/post";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mention, MentionsInput } from "react-mentions";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-export const MakePostForm = () => {
-  const { status } = useSession();
-
-  if (status === "unauthenticated") return null;
-
-  return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Make a post</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PostForm />
-        </CardContent>
-      </Card>
-      <div></div>
-    </>
-  );
-};
 
 export function PostForm() {
   const { data: session } = useSession();
   const { toast } = useToast();
-  const router = useRouter();
   const [query, setQuery] = useState("");
   const response = api.user.getAllUsers.useQuery(query);
-
+  const trpcUtils = api.useUtils();
   const post = api.post.create.useMutation({
     onSuccess: (post) => {
       toast({
         title: "You made a quote!",
-        description: `"${post.content.replace(/@\[(.*?)]\(\d+\)/g, "@$1")}"`,
+        description: `"${post.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
       });
-      router.refresh();
+      trpcUtils.post.infiniteFeed.invalidate();
     },
     onError: () => {
       toast({
@@ -73,10 +52,12 @@ export function PostForm() {
   });
 
   function onSubmit(values: PostFormSchema) {
-    post.mutate({
-      content: values.content.replace(/@\[(.*?)]\(\d+\)/g, "@$1"),
-      by: values.by,
-    });
+    post.mutate(values);
+
+    // post.mutate({
+    //   content: values.content.replace(/@\[(.*?)]\(\d+\)/g, "@$2"),
+    //   by: values.by,
+    // });
     form.reset();
   }
 

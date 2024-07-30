@@ -1,11 +1,10 @@
-import type { Post } from "@/types/post";
+import type { MentionedUser, Post } from "@/types/post";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useSession } from "next-auth/react";
-import { VscHeart, VscHeartFilled } from "react-icons/vsc";
-import { IconHoverEffect } from "../IconHoverEffect";
 import { api } from "@/trpc/react";
+import { HeartButton } from "@/components/posts/HeartButton";
+import { UserHoverCard } from "@/components/posts/userHoverCard";
 type InfinitePostListProps = {
   isLoading: boolean;
   isError: boolean;
@@ -49,35 +48,11 @@ const PostCard = ({
   createdAt,
   likeCount,
   likedByMe,
+  mentions,
 }: Post) => {
   const trpcUtils = api.useUtils();
   const toggleLike = api.post.toggleLike.useMutation({
     onSuccess: async ({ addedLike }) => {
-      // const updateData: Parameters<
-      //   typeof trpcUtils.post.infiniteFeed.setInfiniteData
-      // >[1] = (oldData) => {
-      //   if (oldData == null) return;
-      //
-      //   return {
-      //     ...oldData,
-      //     pages: oldData.pages.map((page) => {
-      //       return {
-      //         ...page,
-      //         posts: page.posts.map((post) => {
-      //           if (post.id === id) {
-      //             return {
-      //               ...post,
-      //               likeCount: post.likeCount + (addedLike ? 1 : -1),
-      //               likedByMe: addedLike,
-      //             };
-      //           }
-      //
-      //           return post;
-      //         }),
-      //       };
-      //     }),
-      //   };
-      // };
       await trpcUtils.post.infiniteFeed.invalidate();
     },
   });
@@ -88,11 +63,10 @@ const PostCard = ({
 
   const onSubmit = () => {
     toggleLike.mutate({ id });
-    // router.refresh();
   };
 
   return (
-    <li className={"flex gap-4 border-b p-4"}>
+    <li className={"flex gap-4 border-b p-4"} key={user.id}>
       <Link href={`/profile/${user.id}`}>
         <Avatar>
           <AvatarImage src={user.image ?? undefined} />
@@ -114,7 +88,9 @@ const PostCard = ({
             {DateTimeFormater.format(createdAt)}
           </span>
         </div>
-        <p className={"whitespace-pre-wrap"}>{content}</p>
+        <div className={"whitespace-pre-wrap"}>
+          {replaceMentions(content, mentions!)}
+        </div>
         <HeartButton
           onClick={onSubmit}
           isLoading={toggleLike.isPending}
@@ -126,44 +102,30 @@ const PostCard = ({
   );
 };
 
-const HeartButton = ({
-  likedByMe,
-  likeCount,
-  onClick,
-  isLoading,
-}: {
-  onClick: () => void;
-  likeCount: number;
-  likedByMe: boolean;
-  isLoading: boolean;
-}) => {
-  const session = useSession();
-  const HeartIcon = likedByMe ? VscHeartFilled : VscHeart;
+const replaceMentions = (text: string, mentions: MentionedUser) => {
+  const mentionPattern = /@\[(.*?)]\(.*?\)/g;
+  let match;
+  const parts = [];
 
-  if (session.status === "unauthenticated")
-    return (
-      <div
-        className={"mb-1 mt-1 flex items-center gap-3 self-start text-gray-500"}
-      >
-        <HeartIcon />
-        <span>{likeCount}</span>
-      </div>
-    );
+  let lastIndex = 0;
+  while ((match = mentionPattern.exec(text)) !== null) {
+    // Push the text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
 
-  return (
-    <button
-      onClick={onClick}
-      disabled={isLoading}
-      className={`group -ml-2 flex items-center gap-1 self-start transition-colors duration-500 ${likedByMe ? "text-red-500" : "text-grey-500 hover:text-red-500 focus-visible:text-red-500"}`}
-    >
-      <IconHoverEffect red>
-        <HeartIcon
-          className={`transition-colors duration-200 ${likedByMe ? "fill-red-500" : "fill-gray-500 group-hover:fill-red-500 group-focus-visible:fill-red-500"}`}
-        ></HeartIcon>
-      </IconHoverEffect>
-      <span>{likeCount}</span>
-    </button>
-  );
+    // Push the React component
+    parts.push(<UserHoverCard {...mentions} />);
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Push the remaining text after the last match
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts;
 };
 
 const NoTweets = () => {

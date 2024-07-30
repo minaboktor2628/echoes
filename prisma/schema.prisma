@@ -30,6 +30,9 @@ model User {
   role          Role      @default(user)
   accounts      Account[]
   sessions      Session[]
+  createdAt     DateTime  @default(now())
+
+  description String @default("This user has no description.")
 
   posts    Post[]
   likes    Like[]

@@ -27,3 +27,4 @@ export type PostFormSchema = z.infer<typeof postFormSchema>;
 export type Post = ElementTypeFromArray<
   RouterOutputs["post"]["infiniteFeed"]["posts"]
 >;
+export type MentionedUser = NonNullable<Post["mentions"]>;

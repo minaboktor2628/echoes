@@ -32,28 +32,28 @@ export const userRouter = createTRPCRouter({
   getAllUsers: publicProcedure
     .input(z.string())
     .query(async ({ input, ctx }) => {
-      return testData
-        .filter((user) =>
-          user.display.toLowerCase().includes(input.toLowerCase()),
-        )
-        .slice(0, 10);
+      // return testData
+      //   .filter((user) =>
+      //     user.display.toLowerCase().includes(input.toLowerCase()),
+      //   )
+      //   .slice(0, 10);
 
-      // ctx.db.user
-      //   .findMany({
-      //     where: {
-      //       name: {
-      //         contains: input,
-      //         mode: "insensitive",
-      //       },
-      //     },
-      //     take: 10,
-      //   })
-      //   .then((users) =>
-      //     users.map((user) => ({
-      //       id: user.id,
-      //       display: user.name!,
-      //     })),
-      //   );
+      return ctx.db.user
+        .findMany({
+          where: {
+            name: {
+              contains: input,
+              mode: "insensitive",
+            },
+          },
+          take: 10,
+        })
+        .then((users) =>
+          users.map((user) => ({
+            id: user.id,
+            display: user.name!,
+          })),
+        );
     }),
 });
 

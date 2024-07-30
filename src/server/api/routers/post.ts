@@ -17,6 +17,7 @@ export const postRouter = createTRPCRouter({
         data: {
           content: input.content,
           createdBy: { connect: { id: ctx.session.user.id } },
+          mentions: input.by ? { connect: { id: input.by } } : undefined,
         },
       });
     }),
@@ -55,6 +56,15 @@ export const postRouter = createTRPCRouter({
             ctx.session?.user.id == null
               ? false
               : { where: { userId: ctx.session?.user.id } },
+          mentions: {
+            select: {
+              name: true,
+              id: true,
+              image: true,
+              createdAt: true,
+              description: true,
+            },
+          },
           createdBy: {
             select: {
               name: true,
@@ -80,6 +90,7 @@ export const postRouter = createTRPCRouter({
           likeCount: post._count.likes,
           user: post.createdBy,
           likedByMe: post.likes.length > 0,
+          mentions: post.mentions,
         })),
         nextCursor,
       };
