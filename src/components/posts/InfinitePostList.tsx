@@ -77,14 +77,20 @@ const PostCard = ({
       </Link>
       <div className={"flex flex-grow flex-col"}>
         <div className={"flex gap-1"}>
-          <Link
+          <UserHoverCard
             className={
-              "font-semibold outline-none hover:underline focus-visible:underline"
+              "-my-2 font-semibold outline-none hover:underline focus-visible:underline"
             }
-            href={`/profile/${user.id}`}
-          >
-            {user.name}
-          </Link>
+            {...user}
+          />
+          {/*<Link*/}
+          {/*  className={*/}
+          {/*    "font-semibold outline-none hover:underline focus-visible:underline"*/}
+          {/*  }*/}
+          {/*  href={`/profile/${user.id}`}*/}
+          {/*>*/}
+          {/*  {user.name}*/}
+          {/*</Link>*/}
           <span className={"text-gray-500"}>-</span>
           <span className={"text-gray-500"}>
             {DateTimeFormater.format(createdAt)}
@@ -121,7 +127,14 @@ const replaceMentions = (text: string, mentions: MentionedUser[]) => {
 
     // Push the React component if the user is found
     if (mentionedUser) {
-      parts.push(<UserHoverCard key={mentionedUser.id} {...mentionedUser} />);
+      parts.push(
+        <UserHoverCard
+          at
+          className={"-my-1"}
+          key={mentionedUser.id + lastIndex}
+          {...mentionedUser}
+        />,
+      );
     } else {
       // If the user is not found, include the raw text
       parts.push(match[0]);

@@ -18,7 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mention, MentionsInput } from "react-mentions";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 export function PostForm() {
   const { data: session } = useSession();
@@ -93,14 +93,8 @@ export function PostForm() {
                   <MentionsInput
                     className={cn("flex w-full text-lg", defaultStyle)}
                     placeholder={"Mention users by typing '@'"}
+                    customSuggestionsContainer={SuggestedContainer}
                     {...field}
-                    customSuggestionsContainer={(children) => (
-                      <Card>
-                        <CardContent className={"mt-22 mb-2 pb-2"}>
-                          {children}
-                        </CardContent>
-                      </Card>
-                    )}
                   >
                     <Mention
                       data={fetchUsers}
@@ -121,5 +115,13 @@ export function PostForm() {
         </Button>
       </form>
     </Form>
+  );
+}
+
+function SuggestedContainer(children: ReactNode) {
+  return (
+    <Card>
+      <CardContent className={"p-2"}>{children}</CardContent>
+    </Card>
   );
 }

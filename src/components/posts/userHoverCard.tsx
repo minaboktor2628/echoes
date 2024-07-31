@@ -1,5 +1,4 @@
 import { CalendarDays } from "lucide-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,21 +6,32 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { MentionedUser } from "@/types/post";
+import type { MentionedUser } from "@/types/post";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+type UserHoverCardProps = MentionedUser & {
+  at?: boolean;
+  className?: string;
+};
 
 export function UserHoverCard({
   image,
   name,
   id,
+  className,
+  at = false,
   createdAt,
   description,
-}: MentionedUser) {
+}: UserHoverCardProps) {
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <Button className={"p-0"} asChild variant="link">
-          <Link href={`/profile/${id}`}>@{name}</Link>
+        <Button className={cn("m-0 p-0", className)} asChild variant="link">
+          <Link href={`/profile/${id}`}>
+            {at ? "@" : ""}
+            {name}
+          </Link>
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="">
