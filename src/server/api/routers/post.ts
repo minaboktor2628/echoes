@@ -17,7 +17,9 @@ export const postRouter = createTRPCRouter({
         data: {
           content: input.content,
           createdBy: { connect: { id: ctx.session.user.id } },
-          mentions: input.by ? { connect: { id: input.by } } : undefined,
+          mentions: input.by
+            ? { connect: input.by.map((id) => ({ id })) }
+            : undefined,
         },
       });
     }),

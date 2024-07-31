@@ -12,10 +12,10 @@ export const infiniteListSchema = z.object({
 });
 
 export const postFormSchema = z.object({
+  by: z.array(z.string()),
   content: z.string().min(1, {
     message: "Post must be at least 1 character in length.",
   }),
-  by: z.string().optional(),
 });
 
 export const toggleLikeSchema = z.object({
@@ -27,4 +27,4 @@ export type PostFormSchema = z.infer<typeof postFormSchema>;
 export type Post = ElementTypeFromArray<
   RouterOutputs["post"]["infiniteFeed"]["posts"]
 >;
-export type MentionedUser = NonNullable<Post["mentions"]>;
+export type MentionedUser = ElementTypeFromArray<Post["mentions"]>;

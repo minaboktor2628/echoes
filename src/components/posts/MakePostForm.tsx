@@ -32,7 +32,7 @@ export function PostForm() {
         title: "You made a quote!",
         description: `"${post.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
       });
-      trpcUtils.post.infiniteFeed.invalidate();
+      void trpcUtils.post.infiniteFeed.invalidate();
     },
     onError: () => {
       toast({
@@ -47,17 +47,13 @@ export function PostForm() {
     resolver: zodResolver(postFormSchema),
     defaultValues: {
       content: "",
-      by: "",
+      by: [],
     },
   });
 
   function onSubmit(values: PostFormSchema) {
     post.mutate(values);
 
-    // post.mutate({
-    //   content: values.content.replace(/@\[(.*?)]\(\d+\)/g, "@$2"),
-    //   by: values.by,
-    // });
     form.reset();
   }
 
@@ -74,7 +70,7 @@ export function PostForm() {
   };
 
   function onAdd(id: string | number) {
-    form.setValue("by", id as string);
+    form.setValue("by", [...form.getValues("by"), id as string]);
   }
   return (
     <Form {...form}>

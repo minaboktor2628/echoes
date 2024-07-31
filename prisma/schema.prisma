@@ -51,9 +51,8 @@ model Post {
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById String
 
-  mentions       User?   @relation("Mentions", fields: [mentionsUserId], references: [id])
-  mentionsUserId String?
-  likes          Like[]
+  mentions User[] @relation("Mentions")
+  likes    Like[]
 
   @@index([content])
   @@unique([createdAt, id])

@@ -5,6 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { api } from "@/trpc/react";
 import { HeartButton } from "@/components/posts/HeartButton";
 import { UserHoverCard } from "@/components/posts/userHoverCard";
+import { ReactNode } from "react";
+
 type InfinitePostListProps = {
   isLoading: boolean;
   isError: boolean;
@@ -89,7 +91,7 @@ const PostCard = ({
           </span>
         </div>
         <div className={"whitespace-pre-wrap"}>
-          {replaceMentions(content, mentions!)}
+          {replaceMentions(content, mentions)}
         </div>
         <HeartButton
           onClick={onSubmit}
@@ -101,11 +103,10 @@ const PostCard = ({
     </li>
   );
 };
-
-const replaceMentions = (text: string, mentions: MentionedUser) => {
+const replaceMentions = (text: string, mentions: MentionedUser[]) => {
   const mentionPattern = /@\[(.*?)]\(.*?\)/g;
   let match;
-  const parts = [];
+  const parts: ReactNode[] = [];
 
   let lastIndex = 0;
   while ((match = mentionPattern.exec(text)) !== null) {
@@ -114,9 +115,17 @@ const replaceMentions = (text: string, mentions: MentionedUser) => {
       parts.push(text.slice(lastIndex, match.index));
     }
 
-    // Push the React component
-    parts.push(<UserHoverCard {...mentions} />);
+    // Find the matching user from mentions
+    const mentionText = match[1]; // This is the text captured by (.*?)
+    const mentionedUser = mentions.find((user) => user.name === mentionText);
 
+    // Push the React component if the user is found
+    if (mentionedUser) {
+      parts.push(<UserHoverCard key={mentionedUser.id} {...mentionedUser} />);
+    } else {
+      // If the user is not found, include the raw text
+      parts.push(match[0]);
+    }
     lastIndex = match.index + match[0].length;
   }
 
