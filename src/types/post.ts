@@ -3,6 +3,7 @@ import type { RouterOutputs } from "@/trpc/react";
 
 export const infiniteListSchema = z.object({
   limit: z.number().optional(),
+  onlyFollowing: z.boolean().optional(),
   cursor: z
     .object({
       id: z.string(),
@@ -10,6 +11,8 @@ export const infiniteListSchema = z.object({
     })
     .optional(),
 });
+
+export type getPosts = z.infer<typeof infiniteListSchema>;
 
 export const postFormSchema = z.object({
   by: z.array(z.string()),

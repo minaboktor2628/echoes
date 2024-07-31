@@ -44,59 +44,69 @@ export const postRouter = createTRPCRouter({
 
   infiniteFeed: publicProcedure
     .input(infiniteListSchema)
-    .query(async ({ input: { limit = 20, cursor }, ctx }) => {
-      const posts = await ctx.db.post.findMany({
-        take: limit + 1,
-        cursor: cursor ? { createdAt_id: cursor } : undefined,
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        select: {
-          id: true,
-          content: true,
-          createdAt: true,
-          _count: { select: { likes: true } },
-          likes:
-            ctx.session?.user.id == undefined || ctx.session?.user.id == null
-              ? false
-              : { where: { userId: ctx.session?.user.id } },
-          mentions: {
-            select: {
-              name: true,
-              id: true,
-              image: true,
-              createdAt: true,
-              description: true,
+    .query(
+      async ({ input: { limit = 20, cursor, onlyFollowing = false }, ctx }) => {
+        const posts = await ctx.db.post.findMany({
+          where:
+            ctx.session?.user.id == null || !onlyFollowing
+              ? {}
+              : {
+                  createdBy: {
+                    followers: { some: { id: ctx.session.user.id } },
+                  },
+                },
+          take: limit + 1,
+          cursor: cursor ? { createdAt_id: cursor } : undefined,
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            _count: { select: { likes: true } },
+            likes:
+              ctx.session?.user.id == undefined || ctx.session?.user.id == null
+                ? false
+                : { where: { userId: ctx.session?.user.id } },
+            mentions: {
+              select: {
+                name: true,
+                id: true,
+                image: true,
+                createdAt: true,
+                description: true,
+              },
+            },
+            createdBy: {
+              select: {
+                createdAt: true,
+                description: true,
+                name: true,
+                id: true,
+                image: true,
+              },
             },
           },
-          createdBy: {
-            select: {
-              createdAt: true,
-              description: true,
-              name: true,
-              id: true,
-              image: true,
-            },
-          },
-        },
-      });
+        });
 
-      let nextCursor: typeof cursor | undefined;
-      if (posts.length > limit) {
-        const nextItem = posts.pop();
-        if (nextItem != null)
-          nextCursor = { id: nextItem.id, createdAt: nextItem.createdAt };
-      }
+        let nextCursor: typeof cursor | undefined;
+        if (posts.length > limit) {
+          const nextItem = posts.pop();
+          if (nextItem != null)
+            nextCursor = { id: nextItem.id, createdAt: nextItem.createdAt };
+        }
 
-      return {
-        posts: posts.map((post) => ({
-          id: post.id,
-          content: post.content,
-          createdAt: post.createdAt,
-          likeCount: post._count.likes,
-          user: post.createdBy,
-          likedByMe: ctx.session == null ? false : post.likes.length > 0,
-          mentions: post.mentions,
-        })),
-        nextCursor,
-      };
-    }),
+        return {
+          posts: posts.map((post) => ({
+            id: post.id,
+            content: post.content,
+            createdAt: post.createdAt,
+            likeCount: post._count.likes,
+            user: post.createdBy,
+            likedByMe: ctx.session == null ? false : post.likes.length > 0,
+            mentions: post.mentions,
+          })),
+          nextCursor,
+        };
+      },
+    ),
 });

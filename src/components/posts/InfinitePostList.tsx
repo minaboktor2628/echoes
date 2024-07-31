@@ -6,6 +6,7 @@ import { api } from "@/trpc/react";
 import { HeartButton } from "@/components/posts/HeartButton";
 import { UserHoverCard } from "@/components/posts/userHoverCard";
 import { ReactNode } from "react";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 type InfinitePostListProps = {
   isLoading: boolean;
@@ -22,7 +23,7 @@ export const InfinitePostList = ({
   isError,
   isLoading,
 }: InfinitePostListProps) => {
-  if (isLoading) return <h1>Loading...</h1>;
+  if (isLoading) return <LoadingSpinner />;
   if (isError) return <h1>Error...</h1>;
   if (posts === null || posts === undefined || posts.length === 0)
     return <NoTweets />;
@@ -31,7 +32,7 @@ export const InfinitePostList = ({
     <ul>
       <InfiniteScroll
         next={fetchNewPosts}
-        loader={"Loading..."}
+        loader={<LoadingSpinner />}
         dataLength={posts.length}
         hasMore={hasMore}
       >
@@ -83,14 +84,6 @@ const PostCard = ({
             }
             {...user}
           />
-          {/*<Link*/}
-          {/*  className={*/}
-          {/*    "font-semibold outline-none hover:underline focus-visible:underline"*/}
-          {/*  }*/}
-          {/*  href={`/profile/${user.id}`}*/}
-          {/*>*/}
-          {/*  {user.name}*/}
-          {/*</Link>*/}
           <span className={"text-gray-500"}>-</span>
           <span className={"text-gray-500"}>
             {DateTimeFormater.format(createdAt)}
