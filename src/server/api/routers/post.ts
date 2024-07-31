@@ -55,7 +55,7 @@ export const postRouter = createTRPCRouter({
           createdAt: true,
           _count: { select: { likes: true } },
           likes:
-            ctx.session?.user.id == null
+            ctx.session?.user.id == undefined || ctx.session?.user.id == null
               ? false
               : { where: { userId: ctx.session?.user.id } },
           mentions: {
@@ -93,7 +93,7 @@ export const postRouter = createTRPCRouter({
           createdAt: post.createdAt,
           likeCount: post._count.likes,
           user: post.createdBy,
-          likedByMe: post.likes.length > 0,
+          likedByMe: ctx.session == null ? false : post.likes.length > 0,
           mentions: post.mentions,
         })),
         nextCursor,

@@ -10,31 +10,16 @@ import {
 import React from "react";
 import { usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
-export const SideBar = () => {
-  const Links = [
-    {
-      url: "/",
-      access: "guest",
-      title: "Home",
-      icon: Home,
-    },
-  ];
+import { useLinks } from "@/hooks/useLinks";
 
+export const SideBar = () => {
+  const { Links } = useLinks();
   const pathname = usePathname();
   const session = useSession();
-  const user = session.data?.user;
   const isActive = (path: string) => {
     return path === pathname;
   };
 
-  if (user !== null) {
-    Links.push({
-      url: `/profile/${user?.id}`,
-      access: "guest",
-      title: "Profile",
-      icon: User,
-    });
-  }
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">

@@ -5,20 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfinitePostList } from "@/components/posts/InfinitePostList";
 import { api } from "@/trpc/react";
 
+const TABS = ["Recent", "Following"] as const;
+
 export default function Home() {
   const { status } = useSession();
-  if (status === "unauthenticated") return null;
-
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Make a post</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PostForm />
-        </CardContent>
-      </Card>
+      {status === "authenticated" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Make a post</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PostForm />
+          </CardContent>
+        </Card>
+      )}
       <RecentPosts />
     </>
   );
