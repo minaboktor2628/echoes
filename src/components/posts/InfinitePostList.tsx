@@ -57,6 +57,7 @@ const PostCard = ({
   const toggleLike = api.post.toggleLike.useMutation({
     onSuccess: async ({ addedLike }) => {
       await trpcUtils.post.infiniteFeed.invalidate();
+      await trpcUtils.post.infiniteProfileFeed.invalidate();
     },
   });
 
