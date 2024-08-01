@@ -28,7 +28,7 @@ export const SideBar = () => {
             <TooltipTrigger asChild>
               <Link
                 href={link.url}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg ${isActive(link.url) ? "bg-accent text-accent-foreground" : "text-muted-foreground"} transition-colors hover:text-foreground md:h-8 md:w-8`}
+                className={`flex h-9 w-9 items-center justify-center rounded-lg ${isActive(link.url) ? "bg-accent text-accent-foreground" : "text-muted-foreground"} transition-colors hover:text-primary md:h-8 md:w-8`}
               >
                 <link.icon className="h-5 w-5" />
                 <span className="sr-only">{link.title}</span>
@@ -45,7 +45,7 @@ export const SideBar = () => {
                   ? signIn("github")
                   : signOut());
               }}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8`}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-primary md:h-8 md:w-8`}
             >
               {session.status === "unauthenticated" ? (
                 <LogIn className="h-5 w-5" />
@@ -68,7 +68,7 @@ export const SideBar = () => {
           <TooltipTrigger asChild>
             <Link
               href={"/settings"}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg ${isActive("#") ? "bg-accent text-accent-foreground" : "text-muted-foreground"} transition-colors hover:text-foreground md:h-8 md:w-8`}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg ${isActive("#") ? "bg-accent text-accent-foreground" : "text-muted-foreground"} transition-colors hover:text-primary md:h-8 md:w-8`}
             >
               <Settings className="h-5 w-5" />
               <span className="sr-only">Settings</span>
