@@ -17,6 +17,7 @@ import React, { useEffect, useState } from "react";
 import { useLinks } from "@/hooks/useLinks";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { ModeToggle } from "@/components/ModeToggle";
 export const Header = () => {
   const { data: session, status } = useSession();
   const { Links, currentPath } = useLinks();
@@ -55,7 +56,7 @@ export const Header = () => {
           className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
         />
       </div>
-      {/*<ModeToggle />*/}
+      <ModeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
