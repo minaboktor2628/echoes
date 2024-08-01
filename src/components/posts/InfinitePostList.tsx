@@ -80,7 +80,7 @@ const PostCard = ({
         <div className={"flex gap-1"}>
           <UserHoverCard
             className={
-              "-my-2 font-semibold outline-none hover:underline focus-visible:underline"
+              "-my-2 font-semibold text-black outline-none hover:underline focus-visible:underline"
             }
             {...user}
           />
