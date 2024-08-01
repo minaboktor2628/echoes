@@ -15,10 +15,10 @@ import { type PostFormSchema, postFormSchema } from "@/types/post";
 import { useSession } from "next-auth/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mention, MentionsInput } from "react-mentions";
 import { cn } from "@/lib/utils";
 import { ReactNode, useState } from "react";
+import { ProfileImage } from "@/components/ProfileImage";
 
 export function PostForm() {
   const { data: session } = useSession();
@@ -85,11 +85,7 @@ export function PostForm() {
             <FormItem>
               <FormControl>
                 <div className={"flex gap-4"}>
-                  <Avatar>
-                    <AvatarImage src={session?.user?.image ?? undefined} />
-                    <AvatarFallback>{session?.user?.name}</AvatarFallback>
-                  </Avatar>
-
+                  <ProfileImage src={session?.user?.image} />
                   <MentionsInput
                     className={cn("flex w-full text-lg", defaultStyle)}
                     placeholder={"Mention users by typing '@'"}

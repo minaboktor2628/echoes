@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfinitePostList } from "@/components/posts/InfinitePostList";
 import { api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import React, { useState } from "react";
 import { getPosts, infiniteListSchema } from "@/types/post";
+import { Header } from "@/components/layouts/header";
 
 const TABS = ["Recent", "Following"] as const;
 type Tabs = (typeof TABS)[number];

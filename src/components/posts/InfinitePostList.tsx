@@ -1,12 +1,12 @@
 import type { MentionedUser, Post } from "@/types/post";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { api } from "@/trpc/react";
 import { HeartButton } from "@/components/posts/HeartButton";
 import { UserHoverCard } from "@/components/posts/userHoverCard";
 import { ReactNode } from "react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { ProfileImage } from "@/components/ProfileImage";
 
 type InfinitePostListProps = {
   isLoading: boolean;
@@ -71,10 +71,7 @@ const PostCard = ({
   return (
     <li className={"flex gap-4 border-b p-4"} key={user.id}>
       <Link href={`/profile/${user.id}`}>
-        <Avatar>
-          <AvatarImage src={user.image ?? undefined} />
-          <AvatarFallback>{user?.name}</AvatarFallback>
-        </Avatar>
+        <ProfileImage src={user.image} />
       </Link>
       <div className={"flex flex-grow flex-col"}>
         <div className={"flex gap-1"}>

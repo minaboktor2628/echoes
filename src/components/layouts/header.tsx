@@ -18,6 +18,7 @@ import { useLinks } from "@/hooks/useLinks";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { ModeToggle } from "@/components/ModeToggle";
+import { ProfileImage } from "@/components/ProfileImage";
 export const Header = () => {
   const { data: session, status } = useSession();
   const { Links, currentPath } = useLinks();
@@ -64,12 +65,7 @@ export const Header = () => {
             size="icon"
             className="overflow-hidden rounded-full"
           >
-            <Avatar>
-              <AvatarImage src={session?.user?.image ?? undefined} />
-              <AvatarFallback>
-                <User />
-              </AvatarFallback>
-            </Avatar>
+            <ProfileImage src={session?.user?.image} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

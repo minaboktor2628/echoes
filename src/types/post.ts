@@ -11,6 +11,16 @@ export const infiniteListSchema = z.object({
     })
     .optional(),
 });
+export const infiniteProfileListSchema = z.object({
+  limit: z.number().optional(),
+  id: z.string(),
+  cursor: z
+    .object({
+      id: z.string(),
+      createdAt: z.date(),
+    })
+    .optional(),
+});
 
 export type getPosts = z.infer<typeof infiniteListSchema>;
 

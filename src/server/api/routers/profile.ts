@@ -20,7 +20,7 @@ export const profileRouter = createTRPCRouter({
         },
       });
 
-      if (profile == null) return;
+      if (profile == null || profile == undefined) return;
 
       return {
         name: profile.name,

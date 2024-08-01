@@ -1,25 +1,19 @@
 "use client";
-import { useParams } from "next/navigation";
 import { api } from "@/trpc/react";
-import ErrorPage from "next/error";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { InfinitePostList } from "@/components/posts/InfinitePostList";
 
-export default function Page() {
-  const { id: _id } = useParams();
-  const id = _id as string;
-  const {
-    data: profile,
-    isPending,
-    isError,
-  } = api.profile.getById.useQuery({ id });
-
-  if (isPending) return <LoadingSpinner big />;
-  if (profile == null || profile.name == null || isError)
-    return <ErrorPage statusCode={404} />;
+export default function Page({ params }: { params: { id: string } }) {
+  const posts = api.post.infiniteProfileFeed.useInfiniteQuery(params, {
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
 
   return (
-    <>
-      <>{profile.name}</>
-    </>
+    <InfinitePostList
+      posts={posts.data?.pages.flatMap((page) => page.posts)}
+      isError={posts.isError}
+      hasMore={posts.hasNextPage}
+      fetchNewPosts={posts.fetchNextPage}
+      isLoading={posts.isLoading}
+    />
   );
 }

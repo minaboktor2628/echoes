@@ -1,5 +1,4 @@
 import { CalendarDays } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   HoverCard,
@@ -9,6 +8,7 @@ import {
 import type { MentionedUser } from "@/types/post";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ProfileImage } from "@/components/ProfileImage";
 
 type UserHoverCardProps = MentionedUser & {
   at?: boolean;
@@ -36,10 +36,7 @@ export function UserHoverCard({
       </HoverCardTrigger>
       <HoverCardContent className="">
         <div className="flex justify-between space-x-4">
-          <Avatar>
-            <AvatarImage src={image ?? undefined} />
-            <AvatarFallback>{name}</AvatarFallback>
-          </Avatar>
+          <ProfileImage src={image} />
           <div className="space-y-1">
             <h4 className="text-sm font-semibold">@{name}</h4>
             <p className="text-sm">{description}</p>
