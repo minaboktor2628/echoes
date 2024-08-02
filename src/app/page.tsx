@@ -23,7 +23,7 @@ export default function Home() {
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
-                className={`flex-grow p-2 hover:bg-gray-200 focus-visible:bg-gray-200 ${tab === selectedTab ? "border-b-4 border-primary font-bold" : ""}`}
+                className={`flex-grow p-2 hover:bg-accent focus-visible:bg-gray-200 ${tab === selectedTab ? "border-b-4 border-primary font-bold" : ""}`}
               >
                 {tab}
               </button>

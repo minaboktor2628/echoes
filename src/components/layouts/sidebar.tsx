@@ -42,7 +42,7 @@ export const SideBar = () => {
             <button
               onClick={() => {
                 void (session.status === "unauthenticated"
-                  ? signIn("github")
+                  ? signIn("discord")
                   : signOut());
               }}
               className={`flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-primary md:h-8 md:w-8`}

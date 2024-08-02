@@ -8,7 +8,7 @@ export const GithubLogInButton = () => {
   return (
     <Button
       onClick={() =>
-        status === "authenticated" ? signOut() : signIn("github")
+        status === "authenticated" ? signOut() : signIn("discord")
       }
     >
       {status === "authenticated" ? "Sign out" : "Sign in"}
