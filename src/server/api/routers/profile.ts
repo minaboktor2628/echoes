@@ -47,7 +47,6 @@ export const profileRouter = createTRPCRouter({
               followers: true,
               follows: true,
               posts: true,
-              likes: true,
             },
           },
           followers:
@@ -66,7 +65,7 @@ export const profileRouter = createTRPCRouter({
         followerCount: profile._count.followers,
         followsCount: profile._count.follows,
         postCount: profile._count.posts,
-        likeCount: profile._count.likes,
+        isMyProfile: ctx.session?.user.id === id,
         isFollowing: profile.followers.length > 0,
       };
     }),

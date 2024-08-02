@@ -33,7 +33,7 @@ model User {
   sessions      Session[]
   createdAt     DateTime  @default(now())
 
-  description String @default("This user has no description.")
+  description String @default("This user does not have a bio yet.")
 
   posts    Post[]
   likes    Like[]

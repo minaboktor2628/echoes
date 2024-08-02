@@ -12,7 +12,6 @@ export default function Page({ params }: { params: { id: string } }) {
   const posts = api.post.infiniteProfileFeed.useInfiniteQuery(params, {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
-  const session = useSession();
   return (
     <>
       <div className={"flex items-center border-t p-6"}>
@@ -24,9 +23,11 @@ export default function Page({ params }: { params: { id: string } }) {
             {getPlural(profile?.postCount ?? 0, "Post", "Posts")} -{" "}
             {profile?.followerCount}{" "}
             {getPlural(profile?.followerCount ?? 0, "Follower", "Followers")} -{" "}
-            {profile?.followsCount} Following - {profile?.likeCount}{" "}
-            {getPlural(profile?.likeCount || 0, "Like", "Likes")}
+            {profile?.followsCount} Following
+            {/*- {profile?.likeCount}{" "}*/}
+            {/*{getPlural(profile?.likeCount || 0, "Like", "Likes")}*/}
           </div>
+          <span className={"text-gray-300"}>{profile?.description}</span>
         </div>
         <FollowButton
           userId={params.id}
@@ -35,7 +36,7 @@ export default function Page({ params }: { params: { id: string } }) {
         />
       </div>
       <InfinitePostList
-        isMyProfile={session.data?.user.id === params.id}
+        isMyProfile={profile?.isMyProfile}
         posts={posts.data?.pages.flatMap((page) => page.posts)}
         isError={posts.isError}
         hasMore={posts.hasNextPage}
