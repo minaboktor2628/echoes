@@ -17,13 +17,14 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { ModeToggle } from "@/components/ModeToggle";
 import { ProfileImage } from "@/components/ProfileImage";
 import { IconHoverEffect } from "@/components/IconHoverEffect";
+import { useState } from "react";
 export const Header = () => {
   const { data: session, status } = useSession();
   const { Links, currentPath } = useLinks();
-
+  const [isLinkClicked, setIsLinkClicked] = useState(false);
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-      <Sheet>
+      <Sheet open={isLinkClicked} onOpenChange={setIsLinkClicked}>
         <SheetTrigger asChild>
           <Button size="icon" variant="outline" className="sm:hidden">
             <PanelLeft className="h-5 w-5" />
@@ -36,6 +37,7 @@ export const Header = () => {
               <Link
                 key={index}
                 href={link.url}
+                onClick={() => setIsLinkClicked(false)}
                 className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
               >
                 <link.icon className="h-5 w-5" />
