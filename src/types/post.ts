@@ -29,17 +29,21 @@ export const deletePostSchema = z.object({
 export type getPosts = z.infer<typeof infiniteListSchema>;
 
 export const postFormSchema = z.object({
-  by: z.array(z.string()),
   content: z.string().min(1, {
     message: "Post must be at least 1 character in length.",
   }),
 });
 
+export const updatePostSchema = postFormSchema.extend({ id: z.string() });
+
 export const toggleLikeSchema = z.object({
   id: z.string(),
 });
 
+export type UpdateProps = Pick<Post, "id" | "content" | "mentions">;
+
 export type PostFormSchema = z.infer<typeof postFormSchema>;
+export type UpdatePostFormSchema = z.infer<typeof updatePostSchema>;
 
 export type Post = ElementTypeFromArray<
   RouterOutputs["post"]["infiniteFeed"]["posts"]

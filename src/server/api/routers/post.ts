@@ -10,21 +10,34 @@ import {
   infiniteProfileListSchema,
   postFormSchema,
   toggleLikeSchema,
+  updatePostSchema,
 } from "@/types/post";
 import { inferAsyncReturnType } from "@trpc/server";
 import { Prisma } from "@prisma/client";
-
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
     .input(postFormSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input: { content } }) => {
+      const by = extractIds(content);
       return ctx.db.post.create({
         data: {
-          content: input.content,
+          content: content,
           createdBy: { connect: { id: ctx.session.user.id } },
-          mentions: input.by
-            ? { connect: input.by.map((id) => ({ id })) }
-            : undefined,
+          mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
+        },
+      });
+    }),
+
+  update: protectedProcedure
+    .input(updatePostSchema)
+    .mutation(async ({ ctx, input: { id, content } }) => {
+      const by = extractIds(content);
+      return ctx.db.post.update({
+        where: { id },
+        data: {
+          content: content,
+          createdBy: { connect: { id: ctx.session.user.id } },
+          mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
         },
       });
     }),
@@ -89,6 +102,19 @@ export const postRouter = createTRPCRouter({
     ),
 });
 
+function extractIds(input: string): string[] {
+  // const regex = /@\[(.*?)]\(.*?\)/g;
+  const regex = /@\[[^\]]+]\((.*?)\)/g;
+  let matches: RegExpExecArray | null;
+  const results: string[] = [];
+  while ((matches = regex.exec(input)) !== null) {
+    if (matches[1] !== undefined) {
+      results.push(matches[1]);
+    }
+  }
+  return results;
+}
+
 async function getInfiniteTweets({
   whereClause,
   ctx,
@@ -109,6 +135,7 @@ async function getInfiniteTweets({
       id: true,
       content: true,
       createdAt: true,
+      updatedAt: true,
       _count: { select: { likes: true } },
       likes:
         ctx.session?.user.id == undefined || ctx.session?.user.id == null
@@ -149,6 +176,9 @@ async function getInfiniteTweets({
       createdAt: post.createdAt,
       likeCount: post._count.likes,
       user: post.createdBy,
+      edited:
+        post.updatedAt.toLocaleTimeString() !==
+        post.createdAt.toLocaleTimeString(),
       likedByMe: ctx.session == null ? false : post.likes.length > 0,
       mentions: post.mentions,
     })),

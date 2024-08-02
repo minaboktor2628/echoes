@@ -10,7 +10,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
-import { type PostFormSchema, postFormSchema } from "@/types/post";
+import {
+  UpdatePostFormSchema,
+  updatePostSchema,
+  UpdateProps,
+} from "@/types/post";
 import { useSession } from "next-auth/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,19 +22,19 @@ import { Mention, MentionsInput } from "react-mentions";
 import { ReactNode, useState } from "react";
 import { ProfileImage } from "@/components/ProfileImage";
 
-export function PostForm() {
+export function UpdatePostForm({ id, content, mentions }: UpdateProps) {
   const { data: session } = useSession();
   const { toast } = useToast();
   const [query, setQuery] = useState("");
   const response = api.user.getAllUsers.useQuery(query);
   const trpcUtils = api.useUtils();
-  const post = api.post.create.useMutation({
+  const post = api.post.update.useMutation({
     onSuccess: (post) => {
       toast({
         title: "You made a quote!",
         description: `"${post.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
       });
-      void trpcUtils.post.infiniteFeed.invalidate();
+      void trpcUtils.post.infiniteProfileFeed.invalidate();
     },
     onError: () => {
       toast({
@@ -41,14 +45,15 @@ export function PostForm() {
     },
   });
 
-  const form = useForm<PostFormSchema>({
-    resolver: zodResolver(postFormSchema),
+  const form = useForm<UpdatePostFormSchema>({
+    resolver: zodResolver(updatePostSchema),
     defaultValues: {
-      content: "",
+      content: content,
+      id: id,
     },
   });
 
-  function onSubmit(values: PostFormSchema) {
+  function onSubmit(values: UpdatePostFormSchema) {
     post.mutate(values);
     form.reset();
   }
@@ -80,9 +85,7 @@ export function PostForm() {
                 <div className={"flex gap-4"}>
                   <ProfileImage src={session?.user?.image} />
                   <MentionsInput
-                    className={
-                      " w-full text-lg focus:border-0 focus:outline-none focus:ring-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
-                    }
+                    className={"flex w-full "}
                     placeholder={"Mention users by typing '@'"}
                     customSuggestionsContainer={SuggestedContainer}
                     {...field}
@@ -100,8 +103,8 @@ export function PostForm() {
             </FormItem>
           )}
         />
-        <Button className={"self-end"} disabled={post.isPending} type="submit">
-          {post.isPending ? "Submitting..." : "Submit"}
+        <Button disabled={post.isPending} type="submit" className={"mt-2"}>
+          {post.isPending ? "Updating..." : "Update"}
         </Button>
       </form>
     </Form>

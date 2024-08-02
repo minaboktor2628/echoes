@@ -15,16 +15,17 @@ export default function Page({ params }: { params: { id: string } }) {
   const session = useSession();
   return (
     <>
-      <div className={"flex items-center border-t p-4"}>
+      <div className={"flex items-center border-t p-6"}>
         <ProfileImage src={profile?.image} className={"size-14"} />
-        <div className={"ml-2 flex-grow"}>
+        <div className={"ml-6 flex-grow"}>
           <h1 className={"text-lg font-bold"}>{profile?.name}</h1>
           <div className={"text-gray-500"}>
             {profile?.postCount}{" "}
             {getPlural(profile?.postCount ?? 0, "Post", "Posts")} -{" "}
             {profile?.followerCount}{" "}
-            {getPlural(profile?.postCount ?? 0, "Follower", "Followers")} -{" "}
-            {profile?.followsCount} Following
+            {getPlural(profile?.followerCount ?? 0, "Follower", "Followers")} -{" "}
+            {profile?.followsCount} Following - {profile?.likeCount}{" "}
+            {getPlural(profile?.likeCount || 0, "Like", "Likes")}
           </div>
         </div>
         <FollowButton

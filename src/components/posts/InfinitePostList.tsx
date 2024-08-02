@@ -52,6 +52,7 @@ const PostCard = ({
   id,
   content,
   user,
+  edited,
   createdAt,
   likeCount,
   likedByMe,
@@ -64,6 +65,7 @@ const PostCard = ({
     onSuccess: async () => {
       await trpcUtils.post.infiniteFeed.invalidate();
       await trpcUtils.post.infiniteProfileFeed.invalidate();
+      await trpcUtils.profile.getById.invalidate();
     },
   });
 
@@ -93,16 +95,21 @@ const PostCard = ({
             <span className={"text-gray-500"}>
               {DateTimeFormater.format(createdAt)}
             </span>
+            {edited && <span className={" text-gray-500"}> - Edited</span>}
           </div>
-          {isMyProfile && <PostOptionDropdown id={id} />}
+          {isMyProfile && (
+            <PostOptionDropdown content={content} mentions={mentions} id={id} />
+          )}
         </div>
         <div className={"whitespace-pre-wrap"}>{postContent}</div>
-        <HeartButton
-          onClick={onSubmit}
-          isLoading={toggleLike.isPending}
-          likeCount={likeCount}
-          likedByMe={likedByMe}
-        />
+        <div className={"flex"}>
+          <HeartButton
+            onClick={onSubmit}
+            isLoading={toggleLike.isPending}
+            likeCount={likeCount}
+            likedByMe={likedByMe}
+          />
+        </div>
       </div>
     </li>
   );
