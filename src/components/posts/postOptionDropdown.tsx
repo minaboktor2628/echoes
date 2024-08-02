@@ -29,8 +29,8 @@ export const PostOptionDropdown = ({ id }: { id: string }) => {
       toast({
         title: "Successfully deleted post.",
       });
-      trpcUtils.post.infiniteProfileFeed.invalidate();
-      trpcUtils.profile.getById.invalidate();
+      void trpcUtils.post.infiniteProfileFeed.invalidate();
+      void trpcUtils.profile.getById.invalidate();
     },
     onError: () => {
       toast({
