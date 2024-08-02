@@ -9,16 +9,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, Search, User } from "lucide-react";
+import { MoveLeft, PanelLeft, Search } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-// import { ModeToggle } from "@/components/theming/modeToggle";
-import React, { useEffect, useState } from "react";
 import { useLinks } from "@/hooks/useLinks";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { ModeToggle } from "@/components/ModeToggle";
 import { ProfileImage } from "@/components/ProfileImage";
+import { IconHoverEffect } from "@/components/IconHoverEffect";
 export const Header = () => {
   const { data: session, status } = useSession();
   const { Links, currentPath } = useLinks();
@@ -48,7 +46,14 @@ export const Header = () => {
           </nav>
         </SheetContent>
       </Sheet>
-      <h1 className={"text-xl font-bold"}>{currentPath}</h1>
+      {currentPath !== "Home" && (
+        <Link href={".."} className={"-mx-2"}>
+          <IconHoverEffect>
+            <MoveLeft className={"size-8"} />
+          </IconHoverEffect>
+        </Link>
+      )}
+      <h1 className={"text-center text-xl font-bold"}>{currentPath}</h1>
       <div className="relative ml-auto flex-1 md:grow-0">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input

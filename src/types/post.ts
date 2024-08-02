@@ -22,6 +22,10 @@ export const infiniteProfileListSchema = z.object({
     .optional(),
 });
 
+export const deletePostSchema = z.object({
+  id: z.string(),
+});
+
 export type getPosts = z.infer<typeof infiniteListSchema>;
 
 export const postFormSchema = z.object({

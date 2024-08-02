@@ -5,6 +5,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import {
+  deletePostSchema,
   infiniteListSchema,
   infiniteProfileListSchema,
   postFormSchema,
@@ -25,6 +26,14 @@ export const postRouter = createTRPCRouter({
             ? { connect: input.by.map((id) => ({ id })) }
             : undefined,
         },
+      });
+    }),
+
+  delete: protectedProcedure
+    .input(deletePostSchema)
+    .mutation(async ({ ctx, input: { id } }) => {
+      return ctx.db.post.delete({
+        where: { id },
       });
     }),
 

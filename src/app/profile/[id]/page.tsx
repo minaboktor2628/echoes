@@ -5,13 +5,14 @@ import { ProfileImage } from "@/components/ProfileImage";
 import { getPlural } from "@/lib/utils";
 import { FollowButton } from "@/components/profile/FollowButton";
 import React from "react";
+import { useSession } from "next-auth/react";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data: profile } = api.profile.getById.useQuery(params);
   const posts = api.post.infiniteProfileFeed.useInfiniteQuery(params, {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
-
+  const session = useSession();
   return (
     <>
       <div className={"flex items-center border-t p-4"}>
@@ -33,6 +34,7 @@ export default function Page({ params }: { params: { id: string } }) {
         />
       </div>
       <InfinitePostList
+        isMyProfile={session.data?.user.id === params.id}
         posts={posts.data?.pages.flatMap((page) => page.posts)}
         isError={posts.isError}
         hasMore={posts.hasNextPage}

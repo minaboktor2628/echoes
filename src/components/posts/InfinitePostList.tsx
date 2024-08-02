@@ -7,6 +7,8 @@ import { UserHoverCard } from "@/components/posts/userHoverCard";
 import { ReactNode } from "react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { ProfileImage } from "@/components/ProfileImage";
+import { Ellipsis } from "lucide-react";
+import { PostOptionDropdown } from "@/components/posts/postOptionDropdown";
 
 type InfinitePostListProps = {
   isLoading: boolean;
@@ -14,6 +16,7 @@ type InfinitePostListProps = {
   hasMore: boolean;
   fetchNewPosts: () => Promise<unknown>;
   posts?: Post[];
+  isMyProfile?: boolean;
 };
 
 export const InfinitePostList = ({
@@ -21,6 +24,7 @@ export const InfinitePostList = ({
   fetchNewPosts,
   hasMore,
   isError,
+  isMyProfile = false,
   isLoading,
 }: InfinitePostListProps) => {
   if (isLoading) return <LoadingSpinner />;
@@ -37,7 +41,7 @@ export const InfinitePostList = ({
         hasMore={hasMore}
       >
         {posts.map((post) => {
-          return <PostCard {...post} key={post.id} />;
+          return <PostCard {...post} isMyProfile={isMyProfile} key={post.id} />;
         })}
       </InfiniteScroll>
     </ul>
@@ -52,10 +56,12 @@ const PostCard = ({
   likeCount,
   likedByMe,
   mentions,
-}: Post) => {
+  isMyProfile,
+}: Post & { isMyProfile: boolean }) => {
+  const postContent = replaceMentions(content, mentions);
   const trpcUtils = api.useUtils();
   const toggleLike = api.post.toggleLike.useMutation({
-    onSuccess: async ({ addedLike }) => {
+    onSuccess: async () => {
       await trpcUtils.post.infiniteFeed.invalidate();
       await trpcUtils.post.infiniteProfileFeed.invalidate();
     },
@@ -75,21 +81,22 @@ const PostCard = ({
         <ProfileImage src={user.image} />
       </Link>
       <div className={"flex flex-grow flex-col"}>
-        <div className={"flex gap-1"}>
-          <UserHoverCard
-            className={
-              "-my-2 font-semibold outline-none hover:underline focus-visible:underline"
-            }
-            {...user}
-          />
-          <span className={"text-gray-500"}>-</span>
-          <span className={"text-gray-500"}>
-            {DateTimeFormater.format(createdAt)}
-          </span>
+        <div className={"flex justify-between gap-1"}>
+          <div>
+            <UserHoverCard
+              className={
+                "-my-2 font-semibold outline-none hover:underline focus-visible:underline"
+              }
+              {...user}
+            />
+            <span className={"text-gray-500"}> - </span>
+            <span className={"text-gray-500"}>
+              {DateTimeFormater.format(createdAt)}
+            </span>
+          </div>
+          {isMyProfile && <PostOptionDropdown id={id} />}
         </div>
-        <div className={"whitespace-pre-wrap"}>
-          {replaceMentions(content, mentions)}
-        </div>
+        <div className={"whitespace-pre-wrap"}>{postContent}</div>
         <HeartButton
           onClick={onSubmit}
           isLoading={toggleLike.isPending}
