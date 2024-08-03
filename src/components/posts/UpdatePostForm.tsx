@@ -31,7 +31,7 @@ export function UpdatePostForm({ id, content, mentions }: UpdateProps) {
   const post = api.post.update.useMutation({
     onSuccess: (post) => {
       toast({
-        title: "You made a quote!",
+        title: "You updates a quote!",
         description: `"${post.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
       });
       void trpcUtils.post.infiniteProfileFeed.invalidate();
