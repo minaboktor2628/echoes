@@ -1,0 +1,37 @@
+TODO:
+  Features:
+    * [] Add spinner to buttons loading
+    * [] Comments on posts
+    * [] private notebook/quotes diary
+    * [] Have tracy redesign logo
+    * [] Make a credits to tracy on
+    * [] subscribe button on friends posts
+      * [] notification on friend's post
+    * [] Ability to send email notifications
+      * [] notification on mentioned
+    * [] Share button on posts
+    * [] Share button profiles
+    * [] Tabs on profile to see posted vs mentioned
+    * [] Ability to remove yourself from a mentioned post
+    * [] Direct message ?
+      * [] group chats
+      * [] sending photos? no bc of nudes
+    * [] Private profiles
+      * [] users have to request to follow you, and you can accept
+      * [] private posts
+    * [] Discord bot
+      * [] command to auto upload quote
+      * [] notification when a post is made
+    * [] Settings Page
+      * [] Dark/light mode
+      * [] Email preferences
+        * [] Email on mention
+        * [] Email on friend posting
+        * [] Email on post comment
+      * [] Edit photo ? S3 buckets? where to host photo?
+      * [] Edit Bio
+      * [] Add pronouns
+  Bugs:
+    * [] Fix trpc slow invalidation - append post / like / etc to list instead
+    * [] Edited posts heuristic is bad
+    * []
