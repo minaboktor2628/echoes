@@ -14,11 +14,27 @@ import {
 } from "@/types/post";
 import { inferAsyncReturnType } from "@trpc/server";
 import { Prisma } from "@prisma/client";
+import { SendMail } from "@/lib/nodemailer";
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
     .input(postFormSchema)
     .mutation(async ({ ctx, input: { content } }) => {
       const by = extractIds(content);
+      if (by.length > 0) {
+        const usersMentioned = await ctx.db.user.findMany({
+          where: { id: { in: by } },
+          select: { email: true },
+        });
+
+        const emailAddresses = usersMentioned.map((user) => user.email);
+        await SendMail({
+          options: {
+            to: emailAddresses,
+            subject: "You were mentioned!",
+            text: "hi",
+          },
+        });
+      }
       return ctx.db.post.create({
         data: {
           content: content,
@@ -32,11 +48,37 @@ export const postRouter = createTRPCRouter({
     .input(updatePostSchema)
     .mutation(async ({ ctx, input: { id, content } }) => {
       const by = extractIds(content);
+      const oldPostMentions =
+        (await ctx.db.post
+          .findUnique({
+            where: { id },
+            select: { mentions: { select: { id: true } } },
+          })
+          .then((r) => r?.mentions.map((mention) => mention.id))) || [];
+
+      const newMentionedUsers = by.filter(
+        (mention) => !oldPostMentions.includes(mention),
+      );
+      if (newMentionedUsers.length > 0) {
+        const usersMentioned = await ctx.db.user
+          .findMany({
+            where: { id: { in: newMentionedUsers } },
+            select: { email: true },
+          })
+          .then((r) => r.map((user) => user.email));
+
+        await SendMail({
+          options: {
+            to: usersMentioned,
+            subject: "You were mentioned!",
+            text: "hi",
+          },
+        });
+      }
       return ctx.db.post.update({
         where: { id },
         data: {
           content: content,
-          createdBy: { connect: { id: ctx.session.user.id } },
           mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
         },
       });
@@ -102,7 +144,7 @@ export const postRouter = createTRPCRouter({
     ),
 });
 
-function extractIds(input: string): string[] {
+function extractIds(input: string) {
   // const regex = /@\[(.*?)]\(.*?\)/g;
   const regex = /@\[[^\]]+]\((.*?)\)/g;
   let matches: RegExpExecArray | null;
