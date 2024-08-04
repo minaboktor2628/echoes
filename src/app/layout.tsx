@@ -1,7 +1,6 @@
 import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
-import { Analytics } from "@vercel/analytics/react";
 import { TRPCReactProvider } from "@/trpc/react";
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +8,7 @@ import { SideBar } from "@/components/layouts/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "@/components/layouts/header";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "Echoes",
