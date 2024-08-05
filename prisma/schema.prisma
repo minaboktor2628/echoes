@@ -42,8 +42,6 @@ model User {
 
   followers User[] @relation("Followers")
   follows   User[] @relation("Followers")
-
-  preferenceId String
 }
 
 enum Theme {

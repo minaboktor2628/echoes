@@ -8,6 +8,7 @@ import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
 import { env } from "@/env";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -20,7 +21,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-
+      preferences: Prisma.PreferenceUpdateWithoutUserInput;
       // ...other properties
       role: "user" | "admin";
     } & DefaultSession["user"];
@@ -28,7 +29,7 @@ declare module "next-auth" {
   interface User {
     // ...other properties
     role: "user" | "admin";
-    preferences: any;
+    preferences: Prisma.PreferenceUpdateWithoutUserInput;
   }
 }
 
