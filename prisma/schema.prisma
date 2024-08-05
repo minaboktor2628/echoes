@@ -33,7 +33,8 @@ model User {
   sessions      Session[]
   createdAt     DateTime  @default(now())
 
-  description String @default("This user does not have a bio yet.")
+  preference  Preference?
+  description String      @default("This user does not have a bio yet.")
 
   posts    Post[]
   likes    Like[]
@@ -41,6 +42,24 @@ model User {
 
   followers User[] @relation("Followers")
   follows   User[] @relation("Followers")
+
+  preferenceId String
+}
+
+enum Theme {
+  SYSTEM
+  LIGHT
+  DARK
+}
+model Preference {
+  id                  String  @id
+  mentionEmails       Boolean @default(true)
+  communicationEmails Boolean @default(true)
+  markitingEmails     Boolean @default(true)
+  socialEmails        Boolean @default(true)
+  directMessageEmails Boolean @default(true)
+  theme               Theme   @default(SYSTEM)
+  user                User    @relation(fields: [id], references: [id])
 }
 
 model Post {
@@ -55,8 +74,8 @@ model Post {
   mentions User[] @relation("Mentions")
   likes    Like[]
 
-  @@index([content])
   @@unique([createdAt, id])
+  @@index([content])
 }
 
 // Necessary for Next auth
