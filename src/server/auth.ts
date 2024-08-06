@@ -21,6 +21,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      email: string;
       preferences: Prisma.PreferenceUpdateWithoutUserInput;
       // ...other properties
       role: "user" | "admin";
@@ -28,6 +29,7 @@ declare module "next-auth" {
   }
   interface User {
     // ...other properties
+    email: string;
     role: "user" | "admin";
     preferences: Prisma.PreferenceUpdateWithoutUserInput;
   }

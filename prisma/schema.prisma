@@ -33,8 +33,8 @@ model User {
   sessions      Session[]
   createdAt     DateTime  @default(now())
 
-  preference  Preference?
-  description String      @default("This user does not have a bio yet.")
+  preference Preference?
+  bio        String      @default("This user does not have a bio yet.")
 
   posts    Post[]
   likes    Like[]
@@ -45,18 +45,19 @@ model User {
 }
 
 enum Theme {
-  SYSTEM
-  LIGHT
-  DARK
+  light
+  system
+  dark
 }
+
 model Preference {
   id                  String  @id
   mentionEmails       Boolean @default(true)
   communicationEmails Boolean @default(true)
-  markitingEmails     Boolean @default(true)
+  marketingEmails     Boolean @default(true)
   socialEmails        Boolean @default(true)
   directMessageEmails Boolean @default(true)
-  theme               Theme   @default(SYSTEM)
+  theme               Theme   @default(system)
   user                User    @relation(fields: [id], references: [id])
 }
 

@@ -17,17 +17,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
-const profileFormSchema = z.object({
-  bio: z.string().max(160).min(4),
-  email: z
-    .string({
-      required_error: "Please select an email to reach you at.",
-    })
-    .email(),
-});
-
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
+import { profileFormSchema, ProfileFormValues } from "@/types/settings";
 
 //TODO
 

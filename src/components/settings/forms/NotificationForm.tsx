@@ -15,17 +15,10 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-
-const notificationsFormSchema = z.object({
-  communication_emails: z.boolean().default(false).optional(),
-  social_emails: z.boolean().default(true).optional(),
-  marketing_emails: z.boolean().default(false).optional(),
-  mention_emails: z.boolean().default(true).optional(),
-  direct_message_emails: z.boolean().default(true).optional(),
-  security_emails: z.boolean(),
-});
-
-type NotificationsFormValues = z.infer<typeof notificationsFormSchema>;
+import {
+  notificationsFormSchema,
+  NotificationsFormValues,
+} from "@/types/settings";
 
 //todo
 const defaultValues: Partial<NotificationsFormValues> = {

@@ -15,14 +15,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-const appearanceFormSchema = z.object({
-  theme: z.enum(["light", "dark", "system"], {
-    required_error: "Please select a theme.",
-  }),
-});
-
-type AppearanceFormValues = z.infer<typeof appearanceFormSchema>;
+import { appearanceFormSchema, AppearanceFormValues } from "@/types/settings";
 
 //TODO
 const defaultValues: Partial<AppearanceFormValues> = {
