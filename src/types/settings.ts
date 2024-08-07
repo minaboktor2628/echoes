@@ -32,7 +32,7 @@ export const profileFormSchema = z.object({
   bio: z.string().max(160).min(4),
   email: z
     .string({
-      required_error: "Please select an email to reach you at.",
+      required_error: "Please select an emails to reach you at.",
     })
     .email(),
 });

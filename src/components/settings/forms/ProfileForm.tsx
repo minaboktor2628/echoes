@@ -25,7 +25,7 @@ export function ProfileForm() {
   const trpcUtils = api.useUtils();
 
   const profile = api.settings.profile.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       void trpcUtils.settings.invalidate();
       toast({
         title: "You updated your profile!",
@@ -50,7 +50,6 @@ export function ProfileForm() {
 
   if (session.status === "loading") return <LoadingSpinner />;
 
-  //TODO
   function onSubmit(data: ProfileFormValues) {
     profile.mutate(data);
   }

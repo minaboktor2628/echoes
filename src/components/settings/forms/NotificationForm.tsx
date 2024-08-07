@@ -25,7 +25,7 @@ export function NotificationsForm() {
   const trpcUtils = api.useUtils();
 
   const notification = api.settings.notifications.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       void trpcUtils.settings.invalidate();
       toast({
         title: "You updated your profile notifications!",

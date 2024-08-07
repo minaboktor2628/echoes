@@ -26,7 +26,7 @@ export function AppearanceForm() {
   const { setTheme } = useTheme();
 
   const appearance = api.settings.appearance.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       void trpcUtils.settings.invalidate();
       toast({
         title: "You updated your profile appearance!",

@@ -6,7 +6,7 @@ import { getServerAuthSession } from "@/server/auth";
 
 export const metadata: Metadata = {
   title: "Settings",
-  description: "Manage your account settings and email preferences.",
+  description: "Manage your account settings and emails preferences.",
 };
 
 const sidebarNavItems = [
