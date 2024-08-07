@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -10,7 +9,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -19,18 +17,22 @@ import {
   notificationsFormSchema,
   NotificationsFormValues,
 } from "@/types/settings";
-
-//todo
-const defaultValues: Partial<NotificationsFormValues> = {
-  communication_emails: false,
-  marketing_emails: false,
-  social_emails: true,
-  security_emails: true,
-  mention_emails: true,
-  direct_message_emails: true,
-};
+import { api } from "@/trpc/react";
+import { useSession } from "next-auth/react";
 
 export function NotificationsForm() {
+  const { data: session } = useSession();
+  const notification = api.settings.notifications.useMutation();
+
+  const defaultValues: Partial<NotificationsFormValues> = {
+    securityEmails: true,
+    communicationEmails: session?.user.communicationEmails,
+    directMessageEmails: session?.user.directMessageEmails,
+    mentionEmails: session?.user.mentionEmails,
+    marketingEmails: session?.user.marketingEmails,
+    socialEmails: session?.user.socialEmails,
+  };
+
   const form = useForm<NotificationsFormValues>({
     resolver: zodResolver(notificationsFormSchema),
     defaultValues,
@@ -38,6 +40,7 @@ export function NotificationsForm() {
 
   //todo
   function onSubmit(data: NotificationsFormValues) {
+    notification.mutate(data);
     toast({
       title: "You submitted the following values:",
       description: (
@@ -56,7 +59,7 @@ export function NotificationsForm() {
           <div className="space-y-4">
             <FormField
               control={form.control}
-              name="communication_emails"
+              name="communicationEmails"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
@@ -78,7 +81,7 @@ export function NotificationsForm() {
             />
             <FormField
               control={form.control}
-              name="marketing_emails"
+              name="marketingEmails"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
@@ -101,7 +104,7 @@ export function NotificationsForm() {
 
             <FormField
               control={form.control}
-              name="social_emails"
+              name="socialEmails"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
@@ -121,7 +124,7 @@ export function NotificationsForm() {
             />
             <FormField
               control={form.control}
-              name="mention_emails"
+              name="mentionEmails"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
@@ -143,7 +146,7 @@ export function NotificationsForm() {
             />
             <FormField
               control={form.control}
-              name="direct_message_emails"
+              name="directMessageEmails"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
@@ -165,7 +168,7 @@ export function NotificationsForm() {
             />
             <FormField
               control={form.control}
-              name="security_emails"
+              name="securityEmails"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">

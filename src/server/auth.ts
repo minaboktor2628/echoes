@@ -21,17 +21,26 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      email: string;
-      preferences: Prisma.PreferenceUpdateWithoutUserInput;
-      // ...other properties
+      bio: string;
+      theme: "system" | "light" | "dark";
+      mentionEmails: boolean;
+      communicationEmails: boolean;
+      marketingEmails: boolean;
+      socialEmails: boolean;
+      directMessageEmails: boolean;
       role: "user" | "admin";
     } & DefaultSession["user"];
   }
   interface User {
     // ...other properties
-    email: string;
+    bio: string;
     role: "user" | "admin";
-    preferences: Prisma.PreferenceUpdateWithoutUserInput;
+    theme: "system" | "light" | "dark";
+    mentionEmails: boolean;
+    communicationEmails: boolean;
+    marketingEmails: boolean;
+    socialEmails: boolean;
+    directMessageEmails: boolean;
   }
 }
 
@@ -42,13 +51,23 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, user }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          theme: user.theme,
+          mentionEmails: user.mentionEmails,
+          communicationEmails: user.communicationEmails,
+          marketingEmails: user.marketingEmails,
+          socialEmails: user.socialEmails,
+          directMessageEmails: user.directMessageEmails,
+          bio: user.bio,
+          role: user.role,
+        },
+      };
+    },
   },
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [

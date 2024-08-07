@@ -147,13 +147,13 @@ async function getInfiniteTweets({
           id: true,
           image: true,
           createdAt: true,
-          description: true,
+          bio: true,
         },
       },
       createdBy: {
         select: {
           createdAt: true,
-          description: true,
+          bio: true,
           name: true,
           id: true,
           image: true,

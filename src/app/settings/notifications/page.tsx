@@ -1,7 +1,10 @@
 import { Separator } from "@/components/ui/separator";
 import { NotificationsForm } from "@/components/settings/forms/NotificationForm";
+import { getServerAuthSession } from "@/server/auth";
+export default async function SettingsNotificationsPage() {
+  const session = await getServerAuthSession();
+  if (!session) return;
 
-export default function SettingsNotificationsPage() {
   return (
     <div className="space-y-6">
       <div>

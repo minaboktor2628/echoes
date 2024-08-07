@@ -2,8 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-
 import {
   Form,
   FormControl,
@@ -18,21 +16,27 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { profileFormSchema, ProfileFormValues } from "@/types/settings";
-
-//TODO
+import { useSession } from "next-auth/react";
+import { api } from "@/trpc/react";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export function ProfileForm() {
+  const session = useSession();
+  const profile = api.settings.profile.useMutation();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: "onChange",
     defaultValues: {
-      bio: "",
-      email: "",
+      bio: session.data?.user.bio,
+      email: session.data?.user.email!,
     },
   });
 
+  if (session.status === "loading") return <LoadingSpinner />;
+
   //TODO
   function onSubmit(data: ProfileFormValues) {
+    profile.mutate(data);
     toast({
       title: "You submitted the following values:",
       description: (
@@ -53,7 +57,11 @@ export function ProfileForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type={"email"} {...field} />
+                <Input
+                  type={"email"}
+                  placeholder={"example@gmail.com"}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 This is where you will receive notifications from us.
@@ -76,8 +84,7 @@ export function ProfileForm() {
                 />
               </FormControl>
               <FormDescription>
-                You can <span>@mention</span> other users and organizations to
-                link to them.
+                This will appear on your profile.
               </FormDescription>
               <FormMessage />
             </FormItem>

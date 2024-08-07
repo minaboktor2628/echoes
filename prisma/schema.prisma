@@ -24,17 +24,22 @@ model Like {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?   @unique
-  email         String?   @unique
+  name          String    @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
   role          Role      @default(user)
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime  @default(now())
+  bio           String?   @default("This user does not have a bio yet.")
+  theme         Theme?    @default(system)
 
-  preference Preference?
-  bio        String      @default("This user does not have a bio yet.")
+  mentionEmails       Boolean? @default(true)
+  communicationEmails Boolean? @default(true)
+  marketingEmails     Boolean? @default(true)
+  socialEmails        Boolean? @default(true)
+  directMessageEmails Boolean? @default(true)
 
   posts    Post[]
   likes    Like[]
@@ -48,17 +53,6 @@ enum Theme {
   light
   system
   dark
-}
-
-model Preference {
-  id                  String  @id
-  mentionEmails       Boolean @default(true)
-  communicationEmails Boolean @default(true)
-  marketingEmails     Boolean @default(true)
-  socialEmails        Boolean @default(true)
-  directMessageEmails Boolean @default(true)
-  theme               Theme   @default(system)
-  user                User    @relation(fields: [id], references: [id])
 }
 
 model Post {

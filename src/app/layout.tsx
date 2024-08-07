@@ -9,17 +9,21 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "@/components/layouts/header";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
+import { getServerAuthSession } from "@/server/auth";
 
 export const metadata = {
   title: "Echoes",
   description: "Social media app to share your friends quotes!",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerAuthSession();
+  const defaultTheme = session?.user?.preferences?.theme || "system";
+
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
@@ -27,7 +31,7 @@ export default function RootLayout({
         <TRPCReactProvider>
           <TooltipProvider>
             <ThemeProvider
-              defaultTheme={"system"}
+              defaultTheme={defaultTheme}
               attribute={"class"}
               enableSystem
             >

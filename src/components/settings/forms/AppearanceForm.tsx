@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -16,28 +15,35 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { appearanceFormSchema, AppearanceFormValues } from "@/types/settings";
-
-//TODO
-const defaultValues: Partial<AppearanceFormValues> = {
-  theme: "system",
-};
+import { useSession } from "next-auth/react";
+import { api } from "@/trpc/react";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export function AppearanceForm() {
-  const form = useForm<AppearanceFormValues>({
-    resolver: zodResolver(appearanceFormSchema),
-    defaultValues,
+  const { data: session, status } = useSession();
+
+  const setTheme = api.settings.appearance.useMutation({
+    onSuccess: (data) => {
+      toast({
+        title: "You submitted the following values:",
+        description: (
+          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+        ),
+      });
+    },
   });
 
-  //TODO
+  const form = useForm<AppearanceFormValues>({
+    resolver: zodResolver(appearanceFormSchema),
+    defaultValues: {
+      theme: session?.user.theme,
+    },
+  });
+
+  if (status === "loading") return <LoadingSpinner big />;
+
   function onSubmit(data: AppearanceFormValues) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    setTheme.mutate(data);
   }
 
   return (

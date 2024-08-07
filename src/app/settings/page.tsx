@@ -1,7 +1,10 @@
 import { Separator } from "@/components/ui/separator";
 import { ProfileForm } from "@/components/settings/forms/ProfileForm";
+import { getServerAuthSession } from "@/server/auth";
 
-export default function SettingsProfilePage() {
+export default async function SettingsProfilePage() {
+  const session = getServerAuthSession();
+  if (!session) return;
   return (
     <div className="space-y-6">
       <div>

@@ -1,7 +1,11 @@
 import { Separator } from "@/components/ui/separator";
 import { AppearanceForm } from "@/components/settings/forms/AppearanceForm";
+import { getServerAuthSession } from "@/server/auth";
 
-export default function SettingsAppearancePage() {
+export default async function SettingsAppearancePage() {
+  const session = await getServerAuthSession();
+  if (!session) return;
+
   return (
     <div className="space-y-6">
       <div>

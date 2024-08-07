@@ -8,13 +8,22 @@ export const appearanceFormSchema = z.object({
 
 export type AppearanceFormValues = z.infer<typeof appearanceFormSchema>;
 
+export type UserPreferences = {
+  theme: "system" | "light" | "dark";
+  mentionEmails: boolean;
+  communicationEmails: boolean;
+  marketingEmails: boolean;
+  socialEmails: boolean;
+  directMessageEmails: boolean;
+};
+
 export const notificationsFormSchema = z.object({
-  communication_emails: z.boolean().default(false).optional(),
-  social_emails: z.boolean().default(true).optional(),
-  marketing_emails: z.boolean().default(false).optional(),
-  mention_emails: z.boolean().default(true).optional(),
-  direct_message_emails: z.boolean().default(true).optional(),
-  security_emails: z.boolean(),
+  communicationEmails: z.boolean().default(false).optional(),
+  socialEmails: z.boolean().default(true).optional(),
+  marketingEmails: z.boolean().default(false).optional(),
+  mentionEmails: z.boolean().default(true).optional(),
+  directMessageEmails: z.boolean().default(true).optional(),
+  securityEmails: z.boolean(),
 });
 
 export type NotificationsFormValues = z.infer<typeof notificationsFormSchema>;

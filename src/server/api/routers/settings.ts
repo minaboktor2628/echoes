@@ -23,7 +23,7 @@ export const settingsRoute = createTRPCRouter({
     .mutation(async ({ ctx, input: { theme } }) => {
       return ctx.db.user.update({
         where: { id: ctx.session.user.id },
-        data: { preference: { update: { theme: theme } } },
+        data: { theme },
       });
     }),
 
@@ -33,15 +33,11 @@ export const settingsRoute = createTRPCRouter({
       return ctx.db.user.update({
         where: { id: ctx.session.user.id },
         data: {
-          preference: {
-            update: {
-              communicationEmails: input.communication_emails,
-              directMessageEmails: input.direct_message_emails,
-              marketingEmails: input.marketing_emails,
-              mentionEmails: input.mention_emails,
-              socialEmails: input.social_emails,
-            },
-          },
+          communicationEmails: input.communicationEmails,
+          directMessageEmails: input.directMessageEmails,
+          marketingEmails: input.marketingEmails,
+          mentionEmails: input.mentionEmails,
+          socialEmails: input.socialEmails,
         },
       });
     }),
