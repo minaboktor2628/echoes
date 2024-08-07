@@ -8,6 +8,8 @@ import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
 import { env } from "@/env";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { UserPreferences } from "@/types/settings";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -20,13 +22,20 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      role: "user" | "admin";
+      bio: string;
+      preferences: UserPreferences;
     } & DefaultSession["user"];
   }
   interface User {
     // ...other properties
+    bio: string;
     role: "user" | "admin";
+    theme: "system" | "light" | "dark";
+    mentionEmails: boolean;
+    communicationEmails: boolean;
+    marketingEmails: boolean;
+    socialEmails: boolean;
+    directMessageEmails: boolean;
   }
 }
 
@@ -37,13 +46,25 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, user }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          preferences: {
+            theme: user.theme,
+            mentionEmails: user.mentionEmails,
+            communicationEmails: user.communicationEmails,
+            marketingEmails: user.marketingEmails,
+            socialEmails: user.socialEmails,
+            directMessageEmails: user.directMessageEmails,
+          },
+          bio: user.bio,
+          role: user.role,
+        },
+      };
+    },
   },
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [

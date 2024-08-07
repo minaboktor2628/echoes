@@ -22,7 +22,7 @@ export const FollowButton = ({
         title: "Success!",
         description: `You ${addedFollow ? "followed" : "unfollowed"} ${userName}.`,
       });
-      trpcUtils.profile.getById.invalidate();
+      void trpcUtils.profile.getById.invalidate();
     },
     onError: () => {
       toast({
