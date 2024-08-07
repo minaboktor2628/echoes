@@ -2,10 +2,11 @@ import { Metadata } from "next";
 import { Separator } from "@/components/ui/separator";
 import { SidebarNav } from "@/components/settings/SidebarNav";
 import React from "react";
+import { getServerAuthSession } from "@/server/auth";
 
 export const metadata: Metadata = {
-  title: "Forms",
-  description: "Advanced form example using react-hook-form and Zod.",
+  title: "Settings",
+  description: "Manage your account settings and email preferences.",
 };
 
 const sidebarNavItems = [
@@ -28,7 +29,12 @@ interface SettingsLayoutProps {
   children: React.ReactNode;
 }
 
-export default function SettingsLayout({ children }: SettingsLayoutProps) {
+export default async function SettingsLayout({
+  children,
+}: SettingsLayoutProps) {
+  const session = await getServerAuthSession();
+  if (!session) return <h1>Please log in to see the settings page</h1>;
+
   return (
     <>
       <div className=" space-y-6 p-10 pb-16 ">
