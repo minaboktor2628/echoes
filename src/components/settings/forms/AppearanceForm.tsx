@@ -21,14 +21,20 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export function AppearanceForm() {
   const { data: session, status } = useSession();
+  const trpcUtils = api.useUtils();
 
-  const setTheme = api.settings.appearance.useMutation({
-    onSuccess: (data) => {
+  const appearance = api.settings.appearance.useMutation({
+    onSuccess: () => {
+      void trpcUtils.settings.invalidate();
       toast({
-        title: "You submitted the following values:",
-        description: (
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        ),
+        title: "You updated your profile appearance!",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Uh oh!",
+        description: "Something went wrong.",
       });
     },
   });
@@ -43,7 +49,7 @@ export function AppearanceForm() {
   if (status === "loading") return <LoadingSpinner big />;
 
   function onSubmit(data: AppearanceFormValues) {
-    setTheme.mutate(data);
+    appearance.mutate(data);
   }
 
   return (

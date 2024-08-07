@@ -22,7 +22,23 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export function ProfileForm() {
   const session = useSession();
-  const profile = api.settings.profile.useMutation();
+  const trpcUtils = api.useUtils();
+
+  const profile = api.settings.profile.useMutation({
+    onSuccess: () => {
+      void trpcUtils.settings.invalidate();
+      toast({
+        title: "You updated your profile!",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Uh oh!",
+        description: "Something went wrong.",
+      });
+    },
+  });
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: "onChange",
@@ -37,14 +53,6 @@ export function ProfileForm() {
   //TODO
   function onSubmit(data: ProfileFormValues) {
     profile.mutate(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
   }
 
   return (

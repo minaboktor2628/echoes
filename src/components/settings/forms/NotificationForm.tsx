@@ -22,33 +22,38 @@ import { useSession } from "next-auth/react";
 
 export function NotificationsForm() {
   const { data: session } = useSession();
-  const notification = api.settings.notifications.useMutation();
+  const trpcUtils = api.useUtils();
 
-  const defaultValues: Partial<NotificationsFormValues> = {
-    securityEmails: true,
-    communicationEmails: session?.user.preferences.communicationEmails,
-    directMessageEmails: session?.user.preferences.directMessageEmails,
-    mentionEmails: session?.user.preferences.mentionEmails,
-    marketingEmails: session?.user.preferences.marketingEmails,
-    socialEmails: session?.user.preferences.socialEmails,
-  };
+  const notification = api.settings.notifications.useMutation({
+    onSuccess: () => {
+      void trpcUtils.settings.invalidate();
+      toast({
+        title: "You updated your profile notifications!",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Uh oh!",
+        description: "Something went wrong.",
+      });
+    },
+  });
 
   const form = useForm<NotificationsFormValues>({
     resolver: zodResolver(notificationsFormSchema),
-    defaultValues,
+    defaultValues: {
+      securityEmails: true,
+      communicationEmails: session?.user.preferences.communicationEmails,
+      directMessageEmails: session?.user.preferences.directMessageEmails,
+      mentionEmails: session?.user.preferences.mentionEmails,
+      marketingEmails: session?.user.preferences.marketingEmails,
+      socialEmails: session?.user.preferences.socialEmails,
+    },
   });
 
-  //todo
   function onSubmit(data: NotificationsFormValues) {
     notification.mutate(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
   }
 
   return (
