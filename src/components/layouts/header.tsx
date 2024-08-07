@@ -56,7 +56,7 @@ export const Header = () => {
                 key={index}
                 href={link.url}
                 onClick={() => setIsLinkClicked(false)}
-                className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-primary"
               >
                 <link.icon className="h-5 w-5" />
                 <span className="sr-only">{link.title}</span>
