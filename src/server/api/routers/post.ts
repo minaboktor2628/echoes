@@ -22,19 +22,25 @@ export const postRouter = createTRPCRouter({
       const by = extractIds(content);
       if (by.length > 0) {
         const usersMentioned = await ctx.db.user.findMany({
-          where: { id: { in: by } },
+          where: { id: { in: by }, mentionEmails: true },
           select: { email: true },
         });
 
-        const emailAddresses = usersMentioned.map((user) => user.email);
-        await SendMail({
-          options: {
-            to: emailAddresses,
-            subject: "You were mentioned!",
-            text: "hi",
-          },
-        });
+        const emailAddresses = usersMentioned
+          .map((user) => user.email)
+          .filter(Boolean);
+
+        if (emailAddresses.length > 0) {
+          await SendMail({
+            options: {
+              to: emailAddresses,
+              subject: "You were mentioned!",
+              text: "hi",
+            },
+          });
+        }
       }
+
       return ctx.db.post.create({
         data: {
           content: content,
@@ -59,21 +65,24 @@ export const postRouter = createTRPCRouter({
       const newMentionedUsers = by.filter(
         (mention) => !oldPostMentions.includes(mention),
       );
+
       if (newMentionedUsers.length > 0) {
         const usersMentioned = await ctx.db.user
           .findMany({
-            where: { id: { in: newMentionedUsers } },
+            where: { id: { in: newMentionedUsers }, mentionEmails: true },
             select: { email: true },
           })
-          .then((r) => r.map((user) => user.email));
+          .then((r) => r.map((user) => user.email).filter(Boolean));
 
-        await SendMail({
-          options: {
-            to: usersMentioned,
-            subject: "You were mentioned!",
-            text: "hi",
-          },
-        });
+        if (usersMentioned.length > 0) {
+          await SendMail({
+            options: {
+              to: usersMentioned,
+              subject: "You were mentioned!",
+              text: "hi",
+            },
+          });
+        }
       }
       return ctx.db.post.update({
         where: { id },
