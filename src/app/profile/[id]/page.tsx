@@ -27,7 +27,7 @@ export default function Page({ params }: { params: { id: string } }) {
             {/*- {profile?.likeCount}{" "}*/}
             {/*{getPlural(profile?.likeCount || 0, "Like", "Likes")}*/}
           </div>
-          <span className={"text-gray-300"}>{profile?.description}</span>
+          <span className={"text-gray-300"}>{profile?.bio}</span>
         </div>
         <FollowButton
           userId={params.id}

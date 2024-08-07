@@ -1,7 +1,6 @@
 import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
-
 import { TRPCReactProvider } from "@/trpc/react";
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,24 +8,30 @@ import { SideBar } from "@/components/layouts/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "@/components/layouts/header";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/react";
+import { getServerAuthSession } from "@/server/auth";
 
 export const metadata = {
   title: "Echoes",
   description: "Social media app to share your friends quotes!",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerAuthSession();
+  const defaultTheme = session?.user?.preferences?.theme || "system";
+
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
+        <Analytics />
         <TRPCReactProvider>
           <TooltipProvider>
             <ThemeProvider
-              defaultTheme={"system"}
+              defaultTheme={defaultTheme}
               attribute={"class"}
               enableSystem
             >

@@ -4,15 +4,15 @@ import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfinitePostList } from "@/components/posts/InfinitePostList";
 import { api } from "@/trpc/react";
-import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
-import { getPosts, infiniteListSchema } from "@/types/post";
-import { Header } from "@/components/layouts/header";
+import { getPosts } from "@/types/post";
 
 const TABS = ["Recent", "Following"] as const;
 type Tabs = (typeof TABS)[number];
+
 export default function Home() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
+  console.log(session);
   const [selectedTab, setSelectedTab] = useState<Tabs>("Recent");
   return (
     <>
