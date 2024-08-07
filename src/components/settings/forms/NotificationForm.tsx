@@ -26,11 +26,11 @@ export function NotificationsForm() {
 
   const defaultValues: Partial<NotificationsFormValues> = {
     securityEmails: true,
-    communicationEmails: session?.user.communicationEmails,
-    directMessageEmails: session?.user.directMessageEmails,
-    mentionEmails: session?.user.mentionEmails,
-    marketingEmails: session?.user.marketingEmails,
-    socialEmails: session?.user.socialEmails,
+    communicationEmails: session?.user.preferences.communicationEmails,
+    directMessageEmails: session?.user.preferences.directMessageEmails,
+    mentionEmails: session?.user.preferences.mentionEmails,
+    marketingEmails: session?.user.preferences.marketingEmails,
+    socialEmails: session?.user.preferences.socialEmails,
   };
 
   const form = useForm<NotificationsFormValues>({

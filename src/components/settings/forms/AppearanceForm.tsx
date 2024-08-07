@@ -36,7 +36,7 @@ export function AppearanceForm() {
   const form = useForm<AppearanceFormValues>({
     resolver: zodResolver(appearanceFormSchema),
     defaultValues: {
-      theme: session?.user.theme,
+      theme: session?.user.preferences.theme,
     },
   });
 

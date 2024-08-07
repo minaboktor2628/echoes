@@ -9,6 +9,7 @@ import DiscordProvider from "next-auth/providers/discord";
 import { env } from "@/env";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { UserPreferences } from "@/types/settings";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -22,13 +23,7 @@ declare module "next-auth" {
     user: {
       id: string;
       bio: string;
-      theme: "system" | "light" | "dark";
-      mentionEmails: boolean;
-      communicationEmails: boolean;
-      marketingEmails: boolean;
-      socialEmails: boolean;
-      directMessageEmails: boolean;
-      role: "user" | "admin";
+      preferences: UserPreferences;
     } & DefaultSession["user"];
   }
   interface User {
@@ -57,12 +52,14 @@ export const authOptions: NextAuthOptions = {
         user: {
           ...session.user,
           id: user.id,
-          theme: user.theme,
-          mentionEmails: user.mentionEmails,
-          communicationEmails: user.communicationEmails,
-          marketingEmails: user.marketingEmails,
-          socialEmails: user.socialEmails,
-          directMessageEmails: user.directMessageEmails,
+          preferences: {
+            theme: user.theme,
+            mentionEmails: user.mentionEmails,
+            communicationEmails: user.communicationEmails,
+            marketingEmails: user.marketingEmails,
+            socialEmails: user.socialEmails,
+            directMessageEmails: user.directMessageEmails,
+          },
           bio: user.bio,
           role: user.role,
         },
