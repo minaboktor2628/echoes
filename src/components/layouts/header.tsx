@@ -9,20 +9,36 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft } from "lucide-react";
-import Link from "next/link";
-import { useLinks } from "@/hooks/useLinks";
+import { PanelLeft, Settings } from "lucide-react";
+import { RouteLink, useLinks } from "@/hooks/useLinks";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { ProfileImage } from "@/components/ProfileImage";
 import { IconHoverEffect } from "@/components/IconHoverEffect";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
+function getLinks(
+  Links: RouteLink[],
+  status: "unauthenticated" | "authenticated" | "loading",
+) {
+  const links = Links;
+  status === "authenticated" &&
+    links.push({
+      url: `/settings`,
+      access: "user",
+      label: "settings",
+      title: "Settings",
+      icon: Settings,
+    });
+  return links;
+}
 export const Header = () => {
   const { data: session, status } = useSession();
-  const { Links } = useLinks();
+  const { Links: links } = useLinks();
   const [isLinkClicked, setIsLinkClicked] = useState(false);
   const pathname = usePathname();
+  const Links = getLinks(links, status);
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
