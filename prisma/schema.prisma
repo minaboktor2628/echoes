@@ -32,17 +32,14 @@ model CommentLike {
 }
 
 model Comment {
-  id       String  @id @default(cuid())
-  userId   String
-  postId   String
-  parentId String? // hold id of parent comment if its a reply
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post     Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  postId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   likes   CommentLike[]
-  comment String
-  replies Comment[]     @relation("CommentReplies") // Relation for replies
-  parent  Comment?      @relation("CommentReplies", fields: [parentId], references: [id]) // Relation to parent comment
+  content String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

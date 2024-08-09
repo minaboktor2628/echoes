@@ -22,25 +22,14 @@ import { render } from "@react-email/components";
 export const postRouter = createTRPCRouter({
   comment: protectedProcedure
     .input(makeCommentSchema)
-    .mutation(async ({ ctx, input: { content, replyToId, postId } }) => {
-      const createCommentArgs: Prisma.CommentCreateArgs = replyToId
-        ? {
-            data: {
-              user: { connect: { id: ctx.session.user.id } },
-              comment: content,
-              post: { connect: { id: postId } },
-              parent: { connect: { id: replyToId } },
-            },
-          }
-        : {
-            data: {
-              user: { connect: { id: ctx.session.user.id } },
-              comment: content,
-              post: { connect: { id: postId } },
-            },
-          };
-
-      return ctx.db.comment.create(createCommentArgs);
+    .mutation(async ({ ctx, input: { content, postId } }) => {
+      return ctx.db.comment.create({
+        data: {
+          content,
+          user: { connect: { id: ctx.session.user.id } },
+          post: { connect: { id: postId } },
+        },
+      });
     }),
 
   getById: publicProcedure
@@ -53,7 +42,29 @@ export const postRouter = createTRPCRouter({
           content: true,
           createdAt: true,
           updatedAt: true,
-          _count: { select: { likes: true } },
+          _count: { select: { likes: true, comments: true } },
+          comments: {
+            select: {
+              updatedAt: true,
+              user: {
+                select: {
+                  name: true,
+                  id: true,
+                  image: true,
+                  createdAt: true,
+                  bio: true,
+                },
+              },
+              content: true,
+              createdAt: true,
+              _count: { select: { likes: true } },
+              likes:
+                ctx.session?.user.id == undefined ||
+                ctx.session?.user.id == null
+                  ? false
+                  : { where: { userId: ctx.session?.user.id } },
+            },
+          },
           likes:
             ctx.session?.user.id == undefined || ctx.session?.user.id == null
               ? false
@@ -76,29 +87,6 @@ export const postRouter = createTRPCRouter({
               image: true,
             },
           },
-          comments: {
-            orderBy: [{ createdAt: "desc" }],
-            select: {
-              parent: {
-                select: {
-                  id: true,
-                },
-              },
-              comment: true,
-              createdAt: true,
-              replies: true,
-              _count: { select: { likes: true, replies: true } },
-              user: {
-                select: {
-                  name: true,
-                  id: true,
-                  image: true,
-                  createdAt: true,
-                  bio: true,
-                },
-              },
-            },
-          },
         },
       });
 
@@ -111,7 +99,7 @@ export const postRouter = createTRPCRouter({
         content: post.content,
         createdAt: post.createdAt,
         likeCount: post._count.likes,
-        commentCount: 0,
+        commentCount: post._count.comments,
         user: post.createdBy,
         edited:
           post.updatedAt.toLocaleTimeString() !==
@@ -291,7 +279,6 @@ export const postRouter = createTRPCRouter({
 });
 
 function extractIds(input: string) {
-  // const regex = /@\[(.*?)]\(.*?\)/g;
   const regex = /@\[[^\]]+]\((.*?)\)/g;
   let matches: RegExpExecArray | null;
   const results: string[] = [];
@@ -324,7 +311,7 @@ async function getInfiniteTweets({
       content: true,
       createdAt: true,
       updatedAt: true,
-      _count: { select: { likes: true } },
+      _count: { select: { likes: true, comments: true } },
       likes:
         ctx.session?.user.id == undefined || ctx.session?.user.id == null
           ? false
@@ -356,14 +343,6 @@ async function getInfiniteTweets({
     if (nextItem != null)
       nextCursor = { id: nextItem.id, createdAt: nextItem.createdAt };
   }
-  //TODO
-  // const commentCount = await ctx.db.comment
-  //   .findMany({
-  //     where: {
-  //       post: { id: { in: posts.map((post) => post.id) } },
-  //     },
-  //   })
-  //   .then((comments) => comments.length);
 
   return {
     posts: posts.map((post) => ({
@@ -371,7 +350,7 @@ async function getInfiniteTweets({
       content: post.content,
       createdAt: post.createdAt,
       likeCount: post._count.likes,
-      commentCount: 0,
+      commentCount: post._count.comments,
       user: post.createdBy,
       edited:
         post.updatedAt.toLocaleTimeString() !==
