@@ -9,6 +9,7 @@ import {
   getPostByIdSchema,
   infiniteListSchema,
   infiniteProfileListSchema,
+  makeCommentSchema,
   postFormSchema,
   toggleLikeSchema,
   updatePostSchema,
@@ -19,6 +20,29 @@ import { SendMail } from "@/lib/nodemailer";
 import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
 import { render } from "@react-email/components";
 export const postRouter = createTRPCRouter({
+  comment: protectedProcedure
+    .input(makeCommentSchema)
+    .mutation(async ({ ctx, input: { content, replyToId, postId } }) => {
+      const createCommentArgs: Prisma.CommentCreateArgs = replyToId
+        ? {
+            data: {
+              user: { connect: { id: ctx.session.user.id } },
+              comment: content,
+              post: { connect: { id: postId } },
+              parent: { connect: { id: replyToId } },
+            },
+          }
+        : {
+            data: {
+              user: { connect: { id: ctx.session.user.id } },
+              comment: content,
+              post: { connect: { id: postId } },
+            },
+          };
+
+      return ctx.db.comment.create(createCommentArgs);
+    }),
+
   getById: publicProcedure
     .input(getPostByIdSchema)
     .query(async ({ ctx, input: { id } }) => {
@@ -52,6 +76,29 @@ export const postRouter = createTRPCRouter({
               image: true,
             },
           },
+          comments: {
+            orderBy: [{ createdAt: "desc" }],
+            select: {
+              parent: {
+                select: {
+                  id: true,
+                },
+              },
+              comment: true,
+              createdAt: true,
+              replies: true,
+              _count: { select: { likes: true, replies: true } },
+              user: {
+                select: {
+                  name: true,
+                  id: true,
+                  image: true,
+                  createdAt: true,
+                  bio: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -59,10 +106,12 @@ export const postRouter = createTRPCRouter({
 
       return {
         id: post.id,
+        comments: post.comments,
         isMyPost: post.createdBy.id === ctx?.session?.user.id,
         content: post.content,
         createdAt: post.createdAt,
         likeCount: post._count.likes,
+        commentCount: 0,
         user: post.createdBy,
         edited:
           post.updatedAt.toLocaleTimeString() !==
@@ -266,7 +315,7 @@ async function getInfiniteTweets({
   ctx: inferAsyncReturnType<typeof createTRPCContext>;
 }) {
   const posts = await ctx.db.post.findMany({
-    where: where,
+    where,
     take: limit + 1,
     cursor: cursor ? { createdAt_id: cursor } : undefined,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -307,6 +356,14 @@ async function getInfiniteTweets({
     if (nextItem != null)
       nextCursor = { id: nextItem.id, createdAt: nextItem.createdAt };
   }
+  //TODO
+  // const commentCount = await ctx.db.comment
+  //   .findMany({
+  //     where: {
+  //       post: { id: { in: posts.map((post) => post.id) } },
+  //     },
+  //   })
+  //   .then((comments) => comments.length);
 
   return {
     posts: posts.map((post) => ({
@@ -314,6 +371,7 @@ async function getInfiniteTweets({
       content: post.content,
       createdAt: post.createdAt,
       likeCount: post._count.likes,
+      commentCount: 0,
       user: post.createdBy,
       edited:
         post.updatedAt.toLocaleTimeString() !==

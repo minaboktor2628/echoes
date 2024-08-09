@@ -40,6 +40,15 @@ export const postFormSchema = z.object({
 
 export const updatePostSchema = postFormSchema.extend({ id: z.string() });
 
+export const makeCommentSchema = z.object({
+  replyToId: z.string().optional(),
+  postId: z.string(),
+  content: z
+    .string()
+    .min(1, { message: "Your comment is too short." })
+    .max(255, { message: "Your comment is too long." }),
+});
+
 export const toggleLikeSchema = z.object({
   id: z.string(),
 });
