@@ -28,7 +28,7 @@ TODO:
       * [x] Email preferences
         * [x] Email on mention
         * [x] Email on friend posting
-        * [x] Email on post comment
+        * [] Email on post comment
       * [] Edit photo ? S3 buckets? where to host photo?
       * [x] Edit Bio
       * [] Add pronouns
