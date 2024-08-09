@@ -14,32 +14,110 @@ import {
 } from "@/types/post";
 import { inferAsyncReturnType } from "@trpc/server";
 import { Prisma } from "@prisma/client";
+import { SendMail } from "@/lib/nodemailer";
+import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
+import { render } from "@react-email/components";
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
     .input(postFormSchema)
     .mutation(async ({ ctx, input: { content } }) => {
       const by = extractIds(content);
-      return ctx.db.post.create({
+      const post = await ctx.db.post.create({
         data: {
           content: content,
           createdBy: { connect: { id: ctx.session.user.id } },
           mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
         },
       });
+
+      if (by.length > 0) {
+        const usersMentioned = await ctx.db.user
+          .findMany({
+            where: { id: { in: by }, mentionEmails: true },
+            select: { email: true, name: true },
+          })
+          .then((users) => users.filter(Boolean));
+
+        for (const user of usersMentioned) {
+          const emailTemplate = MentionedUserEmail({
+            mentionedByImg: ctx.session.user.image || "",
+            postLink: `/posts/${post.id}`,
+            content: content,
+            mentionedByUsername: ctx.session.user.name!,
+            postedDate: new Date(),
+            mentionedByEmail: ctx.session.user.email!,
+            mentionedById: ctx.session.user.id,
+            username: user.name,
+          });
+
+          await SendMail({
+            options: {
+              to: user.email,
+              subject: "You were mentioned!",
+              html: render(emailTemplate),
+            },
+          });
+        }
+      }
+
+      return post;
     }),
 
   update: protectedProcedure
     .input(updatePostSchema)
     .mutation(async ({ ctx, input: { id, content } }) => {
       const by = extractIds(content);
-      return ctx.db.post.update({
+      const post = await ctx.db.post.update({
         where: { id },
         data: {
           content: content,
-          createdBy: { connect: { id: ctx.session.user.id } },
           mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
         },
       });
+
+      const oldPostMentions =
+        (await ctx.db.post
+          .findUnique({
+            where: { id },
+            select: { mentions: { select: { id: true } } },
+          })
+          .then((r) => r?.mentions.map((mention) => mention.id))) || [];
+
+      const newMentionedUsers = by.filter(
+        (mention) => !oldPostMentions.includes(mention),
+      );
+
+      if (newMentionedUsers.length > 0) {
+        const usersMentioned = await ctx.db.user
+          .findMany({
+            where: { id: { in: newMentionedUsers }, mentionEmails: true },
+            select: { email: true, name: true },
+          })
+          .then((r) => r.filter(Boolean));
+
+        for (const user of usersMentioned) {
+          const emailTemplate = MentionedUserEmail({
+            mentionedByImg: ctx.session.user.image || "",
+            postLink: `/posts/${post.id}`,
+            content: content,
+            mentionedByUsername: ctx.session.user.name!,
+            postedDate: new Date(),
+            mentionedByEmail: ctx.session.user.email!,
+            mentionedById: ctx.session.user.id,
+            username: user.name,
+          });
+
+          await SendMail({
+            options: {
+              to: user.email,
+              subject: "You were mentioned!",
+              html: render(emailTemplate),
+            },
+          });
+        }
+      }
+
+      return post;
     }),
 
   delete: protectedProcedure
@@ -70,11 +148,18 @@ export const postRouter = createTRPCRouter({
 
   infiniteProfileFeed: publicProcedure
     .input(infiniteProfileListSchema)
-    .query(async ({ ctx, input: { id, cursor, limit = 30 } }) => {
+    .query(async ({ ctx, input: { id, tab, cursor, limit = 30 } }) => {
+      const where: Prisma.PostWhereInput =
+        tab === "Mentioned In"
+          ? {
+              mentions: { some: { id } },
+            }
+          : {
+              createdById: id,
+            };
+
       return getInfiniteTweets({
-        whereClause: {
-          createdById: id,
-        },
+        where,
         limit,
         cursor,
         ctx,
@@ -89,7 +174,7 @@ export const postRouter = createTRPCRouter({
           limit,
           cursor,
           ctx,
-          whereClause:
+          where:
             ctx.session?.user.id == null || !onlyFollowing
               ? {}
               : {
@@ -102,7 +187,7 @@ export const postRouter = createTRPCRouter({
     ),
 });
 
-function extractIds(input: string): string[] {
+function extractIds(input: string) {
   // const regex = /@\[(.*?)]\(.*?\)/g;
   const regex = /@\[[^\]]+]\((.*?)\)/g;
   let matches: RegExpExecArray | null;
@@ -116,18 +201,18 @@ function extractIds(input: string): string[] {
 }
 
 async function getInfiniteTweets({
-  whereClause,
+  where,
   ctx,
   limit,
   cursor,
 }: {
-  whereClause?: Prisma.PostWhereInput;
+  where?: Prisma.PostWhereInput;
   limit: number;
   cursor: { id: string; createdAt: Date } | undefined;
   ctx: inferAsyncReturnType<typeof createTRPCContext>;
 }) {
   const posts = await ctx.db.post.findMany({
-    where: whereClause,
+    where: where,
     take: limit + 1,
     cursor: cursor ? { createdAt_id: cursor } : undefined,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -147,13 +232,13 @@ async function getInfiniteTweets({
           id: true,
           image: true,
           createdAt: true,
-          description: true,
+          bio: true,
         },
       },
       createdBy: {
         select: {
           createdAt: true,
-          description: true,
+          bio: true,
           name: true,
           id: true,
           image: true,

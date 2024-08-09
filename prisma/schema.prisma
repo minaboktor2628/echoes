@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL") // uses a direct connection
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -24,16 +24,22 @@ model Like {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
+  name          String    @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
   role          Role      @default(user)
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime  @default(now())
+  bio           String?   @default("This user does not have a bio yet.")
+  theme         Theme?    @default(system)
 
-  description String @default("This user does not have a bio yet.")
+  mentionEmails       Boolean? @default(true)
+  communicationEmails Boolean? @default(true)
+  marketingEmails     Boolean? @default(true)
+  socialEmails        Boolean? @default(true)
+  directMessageEmails Boolean? @default(true)
 
   posts    Post[]
   likes    Like[]
@@ -41,6 +47,12 @@ model User {
 
   followers User[] @relation("Followers")
   follows   User[] @relation("Followers")
+}
+
+enum Theme {
+  light
+  system
+  dark
 }
 
 model Post {
@@ -55,8 +67,8 @@ model Post {
   mentions User[] @relation("Mentions")
   likes    Like[]
 
-  @@index([content])
   @@unique([createdAt, id])
+  @@index([content])
 }
 
 // Necessary for Next auth

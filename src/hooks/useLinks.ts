@@ -2,7 +2,7 @@ import { useSession } from "next-auth/react";
 import { Home, LucideProps, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
-type Link = {
+export type RouteLink = {
   url: string;
   access: string;
   title: string;
@@ -17,7 +17,7 @@ export function useLinks() {
   const user = session.data?.user;
   const pathname = usePathname();
 
-  const Links: Link[] = [
+  const Links: RouteLink[] = [
     {
       url: "/",
       access: "guest",

@@ -40,7 +40,7 @@ export const profileRouter = createTRPCRouter({
         select: {
           id: true,
           image: true,
-          description: true,
+          bio: true,
           name: true,
           _count: {
             select: {
@@ -61,7 +61,7 @@ export const profileRouter = createTRPCRouter({
       return {
         name: profile.name,
         image: profile.image,
-        description: profile.description,
+        bio: profile.bio,
         followerCount: profile._count.followers,
         followsCount: profile._count.follows,
         postCount: profile._count.posts,
