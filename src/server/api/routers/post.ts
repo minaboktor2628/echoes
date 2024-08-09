@@ -15,45 +15,66 @@ import {
 import { inferAsyncReturnType } from "@trpc/server";
 import { Prisma } from "@prisma/client";
 import { SendMail } from "@/lib/nodemailer";
+import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
+import { render } from "@react-email/components";
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
     .input(postFormSchema)
     .mutation(async ({ ctx, input: { content } }) => {
       const by = extractIds(content);
-      if (by.length > 0) {
-        const usersMentioned = await ctx.db.user.findMany({
-          where: { id: { in: by }, mentionEmails: true },
-          select: { email: true },
-        });
-
-        const emailAddresses = usersMentioned
-          .map((user) => user.email)
-          .filter(Boolean);
-
-        if (emailAddresses.length > 0) {
-          await SendMail({
-            options: {
-              to: emailAddresses,
-              subject: "You were mentioned!",
-              text: "hi",
-            },
-          });
-        }
-      }
-
-      return ctx.db.post.create({
+      const post = await ctx.db.post.create({
         data: {
           content: content,
           createdBy: { connect: { id: ctx.session.user.id } },
           mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
         },
       });
+
+      if (by.length > 0) {
+        const usersMentioned = await ctx.db.user
+          .findMany({
+            where: { id: { in: by }, mentionEmails: true },
+            select: { email: true, name: true },
+          })
+          .then((users) => users.filter(Boolean));
+
+        for (const user of usersMentioned) {
+          const emailTemplate = MentionedUserEmail({
+            mentionedByImg: ctx.session.user.image || "",
+            postLink: `/posts/${post.id}`,
+            content: content,
+            mentionedByUsername: ctx.session.user.name!,
+            postedDate: new Date(),
+            mentionedByEmail: ctx.session.user.email!,
+            mentionedById: ctx.session.user.id,
+            username: user.name,
+          });
+
+          await SendMail({
+            options: {
+              to: user.email,
+              subject: "You were mentioned!",
+              html: render(emailTemplate),
+            },
+          });
+        }
+      }
+
+      return post;
     }),
 
   update: protectedProcedure
     .input(updatePostSchema)
     .mutation(async ({ ctx, input: { id, content } }) => {
       const by = extractIds(content);
+      const post = await ctx.db.post.update({
+        where: { id },
+        data: {
+          content: content,
+          mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
+        },
+      });
+
       const oldPostMentions =
         (await ctx.db.post
           .findUnique({
@@ -70,27 +91,33 @@ export const postRouter = createTRPCRouter({
         const usersMentioned = await ctx.db.user
           .findMany({
             where: { id: { in: newMentionedUsers }, mentionEmails: true },
-            select: { email: true },
+            select: { email: true, name: true },
           })
-          .then((r) => r.map((user) => user.email).filter(Boolean));
+          .then((r) => r.filter(Boolean));
 
-        if (usersMentioned.length > 0) {
+        for (const user of usersMentioned) {
+          const emailTemplate = MentionedUserEmail({
+            mentionedByImg: ctx.session.user.image || "",
+            postLink: `/posts/${post.id}`,
+            content: content,
+            mentionedByUsername: ctx.session.user.name!,
+            postedDate: new Date(),
+            mentionedByEmail: ctx.session.user.email!,
+            mentionedById: ctx.session.user.id,
+            username: user.name,
+          });
+
           await SendMail({
             options: {
-              to: usersMentioned,
+              to: user.email,
               subject: "You were mentioned!",
-              text: "hi",
+              html: render(emailTemplate),
             },
           });
         }
       }
-      return ctx.db.post.update({
-        where: { id },
-        data: {
-          content: content,
-          mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
-        },
-      });
+
+      return post;
     }),
 
   delete: protectedProcedure
