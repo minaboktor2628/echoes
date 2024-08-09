@@ -11,6 +11,9 @@ export const infiniteListSchema = z.object({
     })
     .optional(),
 });
+
+export const getPostByIdSchema = z.object({ id: z.string() });
+
 export const infiniteProfileListSchema = z.object({
   limit: z.number().optional(),
   id: z.string(),

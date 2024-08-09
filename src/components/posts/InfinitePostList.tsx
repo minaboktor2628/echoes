@@ -41,14 +41,14 @@ export const InfinitePostList = ({
         hasMore={hasMore}
       >
         {posts.map((post) => {
-          return <PostCard {...post} isMyProfile={isMyProfile} key={post.id} />;
+          return <PostCard {...post} isMyPost={isMyProfile} key={post.id} />;
         })}
       </InfiniteScroll>
     </ul>
   );
 };
 
-const PostCard = ({
+export const PostCard = ({
   id,
   content,
   user,
@@ -57,8 +57,8 @@ const PostCard = ({
   likeCount,
   likedByMe,
   mentions,
-  isMyProfile,
-}: Post & { isMyProfile: boolean }) => {
+  isMyPost,
+}: Post & { isMyPost: boolean }) => {
   const postContent = replaceMentions(content, mentions);
   const trpcUtils = api.useUtils();
   const toggleLike = api.post.toggleLike.useMutation({
@@ -97,7 +97,7 @@ const PostCard = ({
             </span>
             {edited && <span className={" text-gray-500"}> - Edited</span>}
           </div>
-          {isMyProfile && (
+          {isMyPost && (
             <PostOptionDropdown content={content} mentions={mentions} id={id} />
           )}
         </div>

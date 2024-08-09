@@ -6,6 +6,7 @@ import {
 } from "@/server/api/trpc";
 import {
   deletePostSchema,
+  getPostByIdSchema,
   infiniteListSchema,
   infiniteProfileListSchema,
   postFormSchema,
@@ -18,6 +19,59 @@ import { SendMail } from "@/lib/nodemailer";
 import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
 import { render } from "@react-email/components";
 export const postRouter = createTRPCRouter({
+  getById: publicProcedure
+    .input(getPostByIdSchema)
+    .query(async ({ ctx, input: { id } }) => {
+      const post = await ctx.db.post.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          updatedAt: true,
+          _count: { select: { likes: true } },
+          likes:
+            ctx.session?.user.id == undefined || ctx.session?.user.id == null
+              ? false
+              : { where: { userId: ctx.session?.user.id } },
+          mentions: {
+            select: {
+              name: true,
+              id: true,
+              image: true,
+              createdAt: true,
+              bio: true,
+            },
+          },
+          createdBy: {
+            select: {
+              createdAt: true,
+              bio: true,
+              name: true,
+              id: true,
+              image: true,
+            },
+          },
+        },
+      });
+
+      if (!post) return;
+
+      return {
+        id: post.id,
+        isMyPost: post.createdBy.id === ctx?.session?.user.id,
+        content: post.content,
+        createdAt: post.createdAt,
+        likeCount: post._count.likes,
+        user: post.createdBy,
+        edited:
+          post.updatedAt.toLocaleTimeString() !==
+          post.createdAt.toLocaleTimeString(),
+        likedByMe: ctx.session == null ? false : post.likes.length > 0,
+        mentions: post.mentions,
+      };
+    }),
+
   create: protectedProcedure
     .input(postFormSchema)
     .mutation(async ({ ctx, input: { content } }) => {
