@@ -2,6 +2,7 @@ TODO:
   Features:
     * [] Add spinner to buttons loading
     * [] Comments on posts
+    * [] Add posts/[id] route
     * [] private notebook/quotes diary
     * [] Have tracy redesign logo
     * [] Make a credits to tracy on
@@ -11,7 +12,7 @@ TODO:
       * [x] notification on mentioned
     * [] Share button on posts
     * [] Share button profiles
-    * [] Tabs on profile to see posted vs mentioned
+    * [x] Tabs on profile to see posted vs mentioned
     * [] Ability to remove yourself from a mentioned post
     * [] Direct message ?
       * [] group chats

@@ -14,6 +14,7 @@ export const infiniteListSchema = z.object({
 export const infiniteProfileListSchema = z.object({
   limit: z.number().optional(),
   id: z.string(),
+  tab: z.enum(["Recent", "Mentioned In"]).default("Recent").optional(),
   cursor: z
     .object({
       id: z.string(),

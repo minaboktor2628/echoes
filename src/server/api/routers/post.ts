@@ -148,11 +148,18 @@ export const postRouter = createTRPCRouter({
 
   infiniteProfileFeed: publicProcedure
     .input(infiniteProfileListSchema)
-    .query(async ({ ctx, input: { id, cursor, limit = 30 } }) => {
+    .query(async ({ ctx, input: { id, tab, cursor, limit = 30 } }) => {
+      const where: Prisma.PostWhereInput =
+        tab === "Mentioned In"
+          ? {
+              mentions: { some: { id } },
+            }
+          : {
+              createdById: id,
+            };
+
       return getInfiniteTweets({
-        whereClause: {
-          createdById: id,
-        },
+        where,
         limit,
         cursor,
         ctx,
@@ -167,7 +174,7 @@ export const postRouter = createTRPCRouter({
           limit,
           cursor,
           ctx,
-          whereClause:
+          where:
             ctx.session?.user.id == null || !onlyFollowing
               ? {}
               : {
@@ -194,18 +201,18 @@ function extractIds(input: string) {
 }
 
 async function getInfiniteTweets({
-  whereClause,
+  where,
   ctx,
   limit,
   cursor,
 }: {
-  whereClause?: Prisma.PostWhereInput;
+  where?: Prisma.PostWhereInput;
   limit: number;
   cursor: { id: string; createdAt: Date } | undefined;
   ctx: inferAsyncReturnType<typeof createTRPCContext>;
 }) {
   const posts = await ctx.db.post.findMany({
-    where: whereClause,
+    where: where,
     take: limit + 1,
     cursor: cursor ? { createdAt_id: cursor } : undefined,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],

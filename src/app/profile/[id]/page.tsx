@@ -4,14 +4,22 @@ import { InfinitePostList } from "@/components/posts/InfinitePostList";
 import { ProfileImage } from "@/components/ProfileImage";
 import { getPlural } from "@/lib/utils";
 import { FollowButton } from "@/components/profile/FollowButton";
-import React from "react";
+import React, { useState } from "react";
 import { useSession } from "next-auth/react";
+
+const TABS = ["Recent", "Mentioned In"] as const;
+type Tabs = (typeof TABS)[number];
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data: profile } = api.profile.getById.useQuery(params);
-  const posts = api.post.infiniteProfileFeed.useInfiniteQuery(params, {
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-  });
+  const [selectedTab, setSelectedTab] = useState<Tabs>("Recent");
+  const posts = api.post.infiniteProfileFeed.useInfiniteQuery(
+    { id: params.id, tab: selectedTab },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
   return (
     <>
       <div className={"flex items-center border-t p-6"}>
@@ -35,6 +43,17 @@ export default function Page({ params }: { params: { id: string } }) {
           isFollowing={profile?.isFollowing}
         />
       </div>
+      <div className={"flex"}>
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setSelectedTab(tab)}
+            className={`flex-grow p-2 hover:bg-accent focus-visible:bg-gray-200 ${tab === selectedTab ? "border-b-4 border-primary font-bold" : ""}`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
       <InfinitePostList
         isMyProfile={profile?.isMyProfile}
         posts={posts.data?.pages.flatMap((page) => page.posts)}
@@ -46,3 +65,5 @@ export default function Page({ params }: { params: { id: string } }) {
     </>
   );
 }
+
+function Posts() {}

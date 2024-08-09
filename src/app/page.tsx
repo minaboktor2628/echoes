@@ -11,8 +11,7 @@ const TABS = ["Recent", "Following"] as const;
 type Tabs = (typeof TABS)[number];
 
 export default function Home() {
-  const { status, data: session } = useSession();
-  console.log(session);
+  const { status } = useSession();
   const [selectedTab, setSelectedTab] = useState<Tabs>("Recent");
   return (
     <>
