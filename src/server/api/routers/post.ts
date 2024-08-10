@@ -45,6 +45,7 @@ export const postRouter = createTRPCRouter({
           _count: { select: { likes: true, comments: true } },
           comments: {
             select: {
+              id: true,
               updatedAt: true,
               user: {
                 select: {
@@ -90,11 +91,21 @@ export const postRouter = createTRPCRouter({
         },
       });
 
-      if (!post) return;
+      if (!post) return null;
 
       return {
         id: post.id,
-        comments: post.comments,
+        comments: post.comments.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          user: comment.user,
+          likeCount: comment._count.likes,
+          createdAt: comment.createdAt,
+          edited:
+            comment.createdAt.toLocaleTimeString() !==
+            comment.updatedAt.toLocaleTimeString(),
+          likedByMe: ctx.session == null ? false : comment.likes.length > 0,
+        })),
         isMyPost: post.createdBy.id === ctx?.session?.user.id,
         content: post.content,
         createdAt: post.createdAt,
@@ -105,7 +116,7 @@ export const postRouter = createTRPCRouter({
           post.updatedAt.toLocaleTimeString() !==
           post.createdAt.toLocaleTimeString(),
         likedByMe: ctx.session == null ? false : post.likes.length > 0,
-        mentions: post.mentions,
+        mentions: post?.mentions,
       };
     }),
 
@@ -233,6 +244,24 @@ export const postRouter = createTRPCRouter({
         return { addedLike: true };
       } else {
         await ctx.db.like.delete({ where: { postId_userId: data } });
+        return { addedLike: true };
+      }
+    }),
+
+  toggleCommentLike: protectedProcedure
+    .input(toggleLikeSchema)
+    .mutation(async ({ ctx, input: { id } }) => {
+      const data = { userId: ctx.session.user.id, commentId: id };
+
+      const existingLike = await ctx.db.commentLike.findUnique({
+        where: { commentId_userId: data },
+      });
+
+      if (existingLike == null) {
+        await ctx.db.commentLike.create({ data });
+        return { addedLike: true };
+      } else {
+        await ctx.db.commentLike.delete({ where: { commentId_userId: data } });
         return { addedLike: true };
       }
     }),

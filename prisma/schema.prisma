@@ -38,8 +38,9 @@ model Comment {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  likes   CommentLike[]
-  content String
+  likes    CommentLike[]
+  content  String
+  mentions User[]        @relation("MentionedInComments")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -71,8 +72,9 @@ model User {
   followers User[] @relation("Followers")
   follows   User[] @relation("Followers")
 
-  comments     Comment[]
-  commentLikes CommentLike[]
+  comments        Comment[]
+  commentLikes    CommentLike[]
+  commentMentions Comment[]     @relation("MentionedInComments")
 }
 
 enum Theme {

@@ -1,4 +1,4 @@
-import { HeartIcon, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { IconHoverEffect } from "@/components/IconHoverEffect";
 

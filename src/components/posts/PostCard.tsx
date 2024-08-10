@@ -6,7 +6,7 @@ import { UserHoverCard } from "@/components/posts/userHoverCard";
 import { PostOptionDropdown } from "@/components/posts/postOptionDropdown";
 import { HeartButton } from "@/components/posts/HeartButton";
 import { ReactNode } from "react";
-import { CommentButton } from "@/components/posts/CommentButton";
+import { CommentButton } from "@/components/comments/CommentButton";
 import { useRouter } from "next/navigation";
 
 export const PostCard = ({
@@ -20,8 +20,13 @@ export const PostCard = ({
   mentions,
   isMyPost,
   commentCount,
+  commentButtonOnCLick,
   isLoadComments = false,
-}: Post & { isMyPost: boolean; isLoadComments?: boolean }) => {
+}: Post & {
+  isMyPost: boolean;
+  isLoadComments?: boolean;
+  commentButtonOnCLick?: () => void;
+}) => {
   const router = useRouter();
   const postContent = replaceMentions(content, mentions);
   const trpcUtils = api.useUtils();
@@ -42,14 +47,14 @@ export const PostCard = ({
     toggleLike.mutate({ id });
   };
 
-  const onCommentButtonClick = () => {
+  const onCommentButtonClickOutsidePostRoute = () => {
     if (!isLoadComments) {
       router.push(`/posts/${id}`);
     }
   };
 
   return (
-    <li className={"flex gap-4 border-b p-4"} key={user.id}>
+    <li className={`"border-b flex gap-4 border-b p-4`} key={user.id}>
       <Link href={`/profile/${user.id}`}>
         <ProfileImage src={user.image} />
       </Link>
@@ -74,7 +79,11 @@ export const PostCard = ({
         <div className={"flex"}>
           <CommentButton
             commentCount={commentCount}
-            onClick={onCommentButtonClick}
+            onClick={
+              isLoadComments
+                ? commentButtonOnCLick
+                : onCommentButtonClickOutsidePostRoute
+            }
           />
           <HeartButton
             onClick={onLike}
@@ -88,7 +97,7 @@ export const PostCard = ({
   );
 };
 
-const replaceMentions = (text: string, mentions: MentionedUser[]) => {
+export const replaceMentions = (text: string, mentions: MentionedUser[]) => {
   const mentionPattern = /@\[(.*?)]\(.*?\)/g;
   let match;
   const parts: ReactNode[] = [];

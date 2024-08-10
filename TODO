@@ -1,6 +1,7 @@
 TODO:
   Features:
     * [] Add spinner to buttons loading
+    * [] Send users in updated posts new email with different title
     * [] Comments on posts
     * [] Add posts/[id] route
     * [] private notebook/quotes diary
