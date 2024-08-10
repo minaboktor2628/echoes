@@ -22,6 +22,30 @@ model Like {
   @@id([postId, userId])
 }
 
+model CommentLike {
+  userId    String
+  commentId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, userId])
+}
+
+model Comment {
+  id     String @id @default(cuid())
+  userId String
+  postId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  likes    CommentLike[]
+  content  String
+  mentions User[]        @relation("MentionedInComments")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String    @unique
@@ -47,6 +71,10 @@ model User {
 
   followers User[] @relation("Followers")
   follows   User[] @relation("Followers")
+
+  comments        Comment[]
+  commentLikes    CommentLike[]
+  commentMentions Comment[]     @relation("MentionedInComments")
 }
 
 enum Theme {
@@ -64,8 +92,9 @@ model Post {
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById String
 
-  mentions User[] @relation("Mentions")
+  mentions User[]    @relation("Mentions")
   likes    Like[]
+  comments Comment[]
 
   @@unique([createdAt, id])
   @@index([content])

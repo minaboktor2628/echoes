@@ -6,8 +6,10 @@ import {
 } from "@/server/api/trpc";
 import {
   deletePostSchema,
+  getPostByIdSchema,
   infiniteListSchema,
   infiniteProfileListSchema,
+  makeCommentSchema,
   postFormSchema,
   toggleLikeSchema,
   updatePostSchema,
@@ -18,6 +20,106 @@ import { SendMail } from "@/lib/nodemailer";
 import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
 import { render } from "@react-email/components";
 export const postRouter = createTRPCRouter({
+  comment: protectedProcedure
+    .input(makeCommentSchema)
+    .mutation(async ({ ctx, input: { content, postId } }) => {
+      return ctx.db.comment.create({
+        data: {
+          content,
+          user: { connect: { id: ctx.session.user.id } },
+          post: { connect: { id: postId } },
+        },
+      });
+    }),
+
+  getById: publicProcedure
+    .input(getPostByIdSchema)
+    .query(async ({ ctx, input: { id } }) => {
+      const post = await ctx.db.post.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          updatedAt: true,
+          _count: { select: { likes: true, comments: true } },
+          comments: {
+            select: {
+              id: true,
+              updatedAt: true,
+              user: {
+                select: {
+                  name: true,
+                  id: true,
+                  image: true,
+                  createdAt: true,
+                  bio: true,
+                },
+              },
+              content: true,
+              createdAt: true,
+              _count: { select: { likes: true } },
+              likes:
+                ctx.session?.user.id == undefined ||
+                ctx.session?.user.id == null
+                  ? false
+                  : { where: { userId: ctx.session?.user.id } },
+            },
+          },
+          likes:
+            ctx.session?.user.id == undefined || ctx.session?.user.id == null
+              ? false
+              : { where: { userId: ctx.session?.user.id } },
+          mentions: {
+            select: {
+              name: true,
+              id: true,
+              image: true,
+              createdAt: true,
+              bio: true,
+            },
+          },
+          createdBy: {
+            select: {
+              createdAt: true,
+              bio: true,
+              name: true,
+              id: true,
+              image: true,
+            },
+          },
+        },
+      });
+
+      if (!post) return null;
+
+      return {
+        id: post.id,
+        comments: post.comments.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          user: comment.user,
+          likeCount: comment._count.likes,
+          createdAt: comment.createdAt,
+          edited:
+            comment.createdAt.toLocaleTimeString() !==
+            comment.updatedAt.toLocaleTimeString(),
+          likedByMe: ctx.session == null ? false : comment.likes.length > 0,
+        })),
+        isMyPost: post.createdBy.id === ctx?.session?.user.id,
+        content: post.content,
+        createdAt: post.createdAt,
+        likeCount: post._count.likes,
+        commentCount: post._count.comments,
+        user: post.createdBy,
+        edited:
+          post.updatedAt.toLocaleTimeString() !==
+          post.createdAt.toLocaleTimeString(),
+        likedByMe: ctx.session == null ? false : post.likes.length > 0,
+        mentions: post?.mentions,
+      };
+    }),
+
   create: protectedProcedure
     .input(postFormSchema)
     .mutation(async ({ ctx, input: { content } }) => {
@@ -146,6 +248,24 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
+  toggleCommentLike: protectedProcedure
+    .input(toggleLikeSchema)
+    .mutation(async ({ ctx, input: { id } }) => {
+      const data = { userId: ctx.session.user.id, commentId: id };
+
+      const existingLike = await ctx.db.commentLike.findUnique({
+        where: { commentId_userId: data },
+      });
+
+      if (existingLike == null) {
+        await ctx.db.commentLike.create({ data });
+        return { addedLike: true };
+      } else {
+        await ctx.db.commentLike.delete({ where: { commentId_userId: data } });
+        return { addedLike: true };
+      }
+    }),
+
   infiniteProfileFeed: publicProcedure
     .input(infiniteProfileListSchema)
     .query(async ({ ctx, input: { id, tab, cursor, limit = 30 } }) => {
@@ -188,7 +308,6 @@ export const postRouter = createTRPCRouter({
 });
 
 function extractIds(input: string) {
-  // const regex = /@\[(.*?)]\(.*?\)/g;
   const regex = /@\[[^\]]+]\((.*?)\)/g;
   let matches: RegExpExecArray | null;
   const results: string[] = [];
@@ -212,7 +331,7 @@ async function getInfiniteTweets({
   ctx: inferAsyncReturnType<typeof createTRPCContext>;
 }) {
   const posts = await ctx.db.post.findMany({
-    where: where,
+    where,
     take: limit + 1,
     cursor: cursor ? { createdAt_id: cursor } : undefined,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -221,7 +340,7 @@ async function getInfiniteTweets({
       content: true,
       createdAt: true,
       updatedAt: true,
-      _count: { select: { likes: true } },
+      _count: { select: { likes: true, comments: true } },
       likes:
         ctx.session?.user.id == undefined || ctx.session?.user.id == null
           ? false
@@ -260,6 +379,7 @@ async function getInfiniteTweets({
       content: post.content,
       createdAt: post.createdAt,
       likeCount: post._count.likes,
+      commentCount: post._count.comments,
       user: post.createdBy,
       edited:
         post.updatedAt.toLocaleTimeString() !==
