@@ -23,18 +23,18 @@ export default function Page({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div>
+    <div className={"flex min-h-screen flex-col"}>
       <PostCard
         {...post}
         commentButtonOnCLick={handleFocus}
         isLoadComments={true}
       />
-      <Card className={"rounded-0 border-0 "}>
+      <Card className={"rounded-0 flex-1 border-0"}>
         <CardHeader>
           <CardTitle>Comments</CardTitle>
         </CardHeader>
         <CardContent>
-          <ol className={"space-y-4"}>
+          <ol className={" space-y-4"}>
             {post.comments.map((comment) => (
               <CommentCard {...comment} key={comment.id} />
             ))}
@@ -42,7 +42,7 @@ export default function Page({ params }: { params: { id: string } }) {
         </CardContent>
       </Card>
       {status === "authenticated" && (
-        <div className={"sticky bottom-0"}>
+        <div className={"sticky bottom-0 "}>
           <MakeCommentForm postId={post.id} ref={makeCommentRef} />
         </div>
       )}
