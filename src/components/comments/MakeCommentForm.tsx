@@ -66,7 +66,7 @@ export const MakeCommentForm = forwardRef<HTMLInputElement, props>(
                 <FormControl>
                   <Input
                     placeholder={"Comment"}
-                    className={"w-full"}
+                    className={"w-full text-base"}
                     {...field}
                     ref={ref}
                   />
