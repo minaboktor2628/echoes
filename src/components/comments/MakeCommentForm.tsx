@@ -78,7 +78,7 @@ export const MakeCommentForm = forwardRef<HTMLInputElement, props>(
             {comment.isPending ? (
               <LoadingSpinner />
             ) : (
-              <SendIcon className={"-mx-1 size-6 hover:text-primary"} />
+              <SendIcon className={"size-6 hover:text-primary"} />
             )}
           </button>
         </form>

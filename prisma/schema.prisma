@@ -95,6 +95,7 @@ model Post {
   mentions User[]    @relation("Mentions")
   likes    Like[]
   comments Comment[]
+  isDiary  Boolean   @default(false)
 
   @@unique([createdAt, id])
   @@index([content])

@@ -26,15 +26,16 @@ export default function Page({ params }: { params: { id: string } }) {
     <div className={"flex min-h-screen flex-col"}>
       <PostCard
         {...post}
+        isMyPost={post.isMyPost}
         commentButtonOnCLick={handleFocus}
-        isLoadComments={true}
+        isPostRoute={true}
       />
       <Card className={"rounded-0 flex-1 border-0"}>
         <CardHeader>
           <CardTitle>Comments</CardTitle>
         </CardHeader>
         <CardContent>
-          <ol className={" space-y-4"}>
+          <ol className={"space-y-4"}>
             {post.comments.map((comment) => (
               <CommentCard {...comment} key={comment.id} />
             ))}

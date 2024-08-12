@@ -7,6 +7,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
@@ -17,6 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Mention, MentionsInput } from "react-mentions";
 import { ReactNode, useState } from "react";
 import { ProfileImage } from "@/components/ProfileImage";
+import { Switch } from "@/components/ui/switch";
 
 export function PostForm() {
   const { data: session } = useSession();
@@ -45,6 +47,7 @@ export function PostForm() {
     resolver: zodResolver(postFormSchema),
     defaultValues: {
       content: "",
+      isDiary: false,
     },
   });
 
@@ -100,9 +103,28 @@ export function PostForm() {
             </FormItem>
           )}
         />
-        <Button className={"self-end"} disabled={post.isPending} type="submit">
-          {post.isPending ? "Submitting..." : "Submit"}
-        </Button>
+        <div className={"flex items-center justify-between"}>
+          <FormField
+            control={form.control}
+            name="isDiary"
+            render={({ field }) => (
+              <FormItem className={"flex items-center space-x-2"}>
+                <FormLabel>Diary Only</FormLabel>
+                <FormControl>
+                  <div className={"align-middle"}>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Button disabled={post.isPending} type="submit">
+            {post.isPending ? "Submitting..." : "Submit"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

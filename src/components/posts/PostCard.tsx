@@ -8,6 +8,9 @@ import { HeartButton } from "@/components/posts/HeartButton";
 import { ReactNode } from "react";
 import { CommentButton } from "@/components/comments/CommentButton";
 import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { toast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 export const PostCard = ({
   id,
@@ -20,13 +23,15 @@ export const PostCard = ({
   mentions,
   isMyPost,
   commentCount,
+  isDiary,
   commentButtonOnCLick,
-  isLoadComments = false,
+  isPostRoute = false,
 }: Post & {
   isMyPost: boolean;
-  isLoadComments?: boolean;
+  isPostRoute: boolean;
   commentButtonOnCLick?: () => void;
 }) => {
+  const { status } = useSession();
   const router = useRouter();
   const postContent = replaceMentions(content, mentions);
   const trpcUtils = api.useUtils();
@@ -47,8 +52,23 @@ export const PostCard = ({
     toggleLike.mutate({ id });
   };
 
-  const onCommentButtonClickOutsidePostRoute = () => {
-    if (!isLoadComments) {
+  const onComment = () => {
+    if (isPostRoute) {
+      if (status === "authenticated" && commentButtonOnCLick) {
+        commentButtonOnCLick();
+      } else {
+        toast({
+          variant: "destructive",
+          title: "You are not logged in.",
+          description: "You must be logged in to comment",
+          action: (
+            <ToastAction altText={"Log in"} onClick={() => signIn("discord")}>
+              Log In
+            </ToastAction>
+          ),
+        });
+      }
+    } else {
       router.push(`/posts/${id}`);
     }
   };
@@ -72,19 +92,17 @@ export const PostCard = ({
             {edited && <span className={"text-gray-500"}> - Edited</span>}
           </div>
           {isMyPost && (
-            <PostOptionDropdown content={content} mentions={mentions} id={id} />
+            <PostOptionDropdown
+              isDiary={isDiary}
+              content={content}
+              mentions={mentions}
+              id={id}
+            />
           )}
         </div>
         <div className={"whitespace-pre-wrap"}>{postContent}</div>
         <div className={"flex"}>
-          <CommentButton
-            commentCount={commentCount}
-            onClick={
-              isLoadComments
-                ? commentButtonOnCLick
-                : onCommentButtonClickOutsidePostRoute
-            }
-          />
+          <CommentButton commentCount={commentCount} onClick={onComment} />
           <HeartButton
             onClick={onLike}
             isLoading={toggleLike.isPending}

@@ -1,14 +1,6 @@
-import type { MentionedUser, Post } from "@/types/post";
+import type { Post } from "@/types/post";
 import InfiniteScroll from "react-infinite-scroll-component";
-import Link from "next/link";
-import { api } from "@/trpc/react";
-import { HeartButton } from "@/components/posts/HeartButton";
-import { UserHoverCard } from "@/components/posts/userHoverCard";
-import { ReactNode } from "react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { ProfileImage } from "@/components/ProfileImage";
-import { Ellipsis } from "lucide-react";
-import { PostOptionDropdown } from "@/components/posts/postOptionDropdown";
 import { PostCard } from "@/components/posts/PostCard";
 
 type InfinitePostListProps = {
@@ -42,7 +34,14 @@ export const InfinitePostList = ({
         hasMore={hasMore}
       >
         {posts.map((post) => {
-          return <PostCard {...post} isMyPost={isMyProfile} key={post.id} />;
+          return (
+            <PostCard
+              {...post}
+              isMyPost={isMyProfile}
+              key={post.id}
+              isPostRoute={false}
+            />
+          );
         })}
       </InfiniteScroll>
     </ul>

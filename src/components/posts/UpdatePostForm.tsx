@@ -7,6 +7,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
@@ -21,8 +22,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { Mention, MentionsInput } from "react-mentions";
 import { ReactNode, useState } from "react";
 import { ProfileImage } from "@/components/ProfileImage";
+import { Switch } from "@/components/ui/switch";
 
-export function UpdatePostForm({ id, content, mentions }: UpdateProps) {
+export function UpdatePostForm({ id, content, isDiary }: UpdateProps) {
   const { data: session } = useSession();
   const { toast } = useToast();
   const [query, setQuery] = useState("");
@@ -50,6 +52,7 @@ export function UpdatePostForm({ id, content, mentions }: UpdateProps) {
     defaultValues: {
       content: content,
       id: id,
+      isDiary: isDiary,
     },
   });
 
@@ -103,9 +106,28 @@ export function UpdatePostForm({ id, content, mentions }: UpdateProps) {
             </FormItem>
           )}
         />
-        <Button disabled={post.isPending} type="submit" className={"mt-2"}>
-          {post.isPending ? "Updating..." : "Update"}
-        </Button>
+        <div className={"flex items-center justify-between"}>
+          <FormField
+            control={form.control}
+            name="isDiary"
+            render={({ field }) => (
+              <FormItem className={"flex items-center space-x-2"}>
+                <FormLabel>Diary Only</FormLabel>
+                <FormControl>
+                  <div className={"align-middle"}>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Button disabled={post.isPending} type="submit">
+            {post.isPending ? "Updating..." : "Update"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

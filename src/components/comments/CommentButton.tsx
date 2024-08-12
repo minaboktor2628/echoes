@@ -11,16 +11,6 @@ export const CommentButton = ({
   commentCount?: number;
   isLoading?: boolean;
 }) => {
-  const session = useSession();
-
-  if (session.status === "unauthenticated")
-    return (
-      <div className={"flex items-center gap-3 text-gray-500"}>
-        <MessageCircle className={"-ml-2 size-5 text-secondary"} />
-        <span>{commentCount}</span>
-      </div>
-    );
-
   return (
     <button
       onClick={onClick}

@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ellipsis, Pencil, Trash } from "lucide-react";
+import { Ellipsis, KeyIcon, Pencil, Trash } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +21,14 @@ import { api } from "@/trpc/react";
 import { useToast } from "@/components/ui/use-toast";
 import { UpdatePostForm } from "@/components/posts/UpdatePostForm";
 import { UpdateProps } from "@/types/post";
+import { TogglePostPrivate } from "@/components/posts/TogglePostPrivateForm";
 
-export const PostOptionDropdown = ({ id, content, mentions }: UpdateProps) => {
+export const PostOptionDropdown = ({
+  id,
+  content,
+  mentions,
+  isDiary,
+}: UpdateProps) => {
   const trpcUtils = api.useUtils();
   const { toast } = useToast();
   const deletePost = api.post.delete.useMutation({
@@ -57,11 +63,7 @@ export const PostOptionDropdown = ({ id, content, mentions }: UpdateProps) => {
         <DropdownMenuGroup>
           <Dialog>
             <DialogTrigger asChild>
-              <button
-                className={
-                  "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                }
-              >
+              <button className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
                 <Pencil className={"mr-2 size-4"} />
                 <span>Edit Post</span>
               </button>
@@ -73,7 +75,32 @@ export const PostOptionDropdown = ({ id, content, mentions }: UpdateProps) => {
                   This post will now appear as edited to others.
                 </DialogDescription>
               </DialogHeader>
-              <UpdatePostForm content={content} id={id} mentions={mentions} />
+              <UpdatePostForm
+                content={content}
+                id={id}
+                mentions={mentions}
+                isDiary={isDiary}
+              />
+            </DialogContent>
+          </Dialog>
+        </DropdownMenuGroup>
+        <DropdownMenuGroup>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                <KeyIcon className={"mr-2 size-4"} />
+                <span>Diary Settings</span>
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Are you sure?</DialogTitle>
+                <DialogDescription>
+                  This affects how this post will be viewed on your profile.
+                </DialogDescription>
+              </DialogHeader>
+              <TogglePostPrivate postId={id} isDiary={isDiary} />
+              {/*<UpdatePostForm content={content} id={id} mentions={mentions} />*/}
             </DialogContent>
           </Dialog>
         </DropdownMenuGroup>
@@ -81,11 +108,7 @@ export const PostOptionDropdown = ({ id, content, mentions }: UpdateProps) => {
         <DropdownMenuGroup>
           <Dialog>
             <DialogTrigger asChild>
-              <button
-                className={
-                  "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-destructive focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                }
-              >
+              <button className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-destructive focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
                 <Trash className={"mr-2 size-4"} />
                 <span>Delete Post</span>
               </button>

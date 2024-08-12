@@ -12,6 +12,7 @@ import {
   makeCommentSchema,
   postFormSchema,
   toggleLikeSchema,
+  togglePostPrivateSchema,
   updatePostSchema,
 } from "@/types/post";
 import { inferAsyncReturnType } from "@trpc/server";
@@ -39,6 +40,7 @@ export const postRouter = createTRPCRouter({
         where: { id },
         select: {
           id: true,
+          isDiary: true,
           content: true,
           createdAt: true,
           updatedAt: true,
@@ -91,7 +93,7 @@ export const postRouter = createTRPCRouter({
         },
       });
 
-      if (!post) return null;
+      if (!post || post.isDiary === true) return null;
 
       return {
         id: post.id,
@@ -106,6 +108,7 @@ export const postRouter = createTRPCRouter({
             comment.updatedAt.toLocaleTimeString(),
           likedByMe: ctx.session == null ? false : comment.likes.length > 0,
         })),
+        isDiary: post.isDiary,
         isMyPost: post.createdBy.id === ctx?.session?.user.id,
         content: post.content,
         createdAt: post.createdAt,
@@ -122,15 +125,18 @@ export const postRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(postFormSchema)
-    .mutation(async ({ ctx, input: { content } }) => {
+    .mutation(async ({ ctx, input: { content, isDiary } }) => {
       const by = extractIds(content);
       const post = await ctx.db.post.create({
         data: {
+          isDiary,
           content: content,
           createdBy: { connect: { id: ctx.session.user.id } },
           mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
         },
       });
+
+      if (isDiary) return post;
 
       if (by.length > 0) {
         const usersMentioned = await ctx.db.user
@@ -167,15 +173,18 @@ export const postRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(updatePostSchema)
-    .mutation(async ({ ctx, input: { id, content } }) => {
+    .mutation(async ({ ctx, input: { id, isDiary, content } }) => {
       const by = extractIds(content);
       const post = await ctx.db.post.update({
         where: { id },
         data: {
+          isDiary,
           content: content,
           mentions: by ? { connect: by.map((id) => ({ id })) } : undefined,
         },
       });
+
+      if (isDiary) return post;
 
       const oldPostMentions =
         (await ctx.db.post
@@ -265,18 +274,53 @@ export const postRouter = createTRPCRouter({
         return { addedLike: true };
       }
     }),
+  togglePostPrivate: protectedProcedure
+    .input(togglePostPrivateSchema)
+    .mutation(async ({ ctx, input: { postId } }) => {
+      const post = await ctx.db.post.findUnique({
+        where: { id: postId },
+        select: { isDiary: true },
+      });
+
+      if (!post) return;
+
+      return ctx.db.post.update({
+        where: { id: postId },
+        data: {
+          isDiary: !post.isDiary,
+        },
+      });
+    }),
 
   infiniteProfileFeed: publicProcedure
     .input(infiniteProfileListSchema)
     .query(async ({ ctx, input: { id, tab, cursor, limit = 30 } }) => {
-      const where: Prisma.PostWhereInput =
-        tab === "Mentioned In"
-          ? {
-              mentions: { some: { id } },
+      let where: Prisma.PostWhereInput;
+
+      switch (tab) {
+        case "Recent":
+          {
+            where = { createdById: id, isDiary: false };
+          }
+          break;
+        case "Mentioned In":
+          {
+            where = { mentions: { some: { id } }, isDiary: false };
+          }
+          break;
+        case "Diary":
+          {
+            if (ctx?.session?.user.id) {
+              where = { createdById: id, isDiary: true };
+            } else {
+              where = { createdById: id };
             }
-          : {
-              createdById: id,
-            };
+          }
+          break;
+        default: {
+          where = { createdById: id };
+        }
+      }
 
       return getInfiniteTweets({
         where,
@@ -296,8 +340,9 @@ export const postRouter = createTRPCRouter({
           ctx,
           where:
             ctx.session?.user.id == null || !onlyFollowing
-              ? {}
+              ? { isDiary: false }
               : {
+                  isDiary: false,
                   createdBy: {
                     followers: { some: { id: ctx.session.user.id } },
                   },
@@ -338,6 +383,7 @@ async function getInfiniteTweets({
     select: {
       id: true,
       content: true,
+      isDiary: true,
       createdAt: true,
       updatedAt: true,
       _count: { select: { likes: true, comments: true } },
@@ -376,6 +422,7 @@ async function getInfiniteTweets({
   return {
     posts: posts.map((post) => ({
       id: post.id,
+      isDiary: post.isDiary,
       content: post.content,
       createdAt: post.createdAt,
       likeCount: post._count.likes,
