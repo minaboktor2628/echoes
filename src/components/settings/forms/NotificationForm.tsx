@@ -137,7 +137,7 @@ export function NotificationsForm() {
                       Mentioned emails
                     </FormLabel>
                     <FormDescription>
-                      Receive emails for when you are mentioned in an echo.
+                      Receive emails for when you are mentioned in an ekko.
                     </FormDescription>
                   </div>
                   <FormControl>

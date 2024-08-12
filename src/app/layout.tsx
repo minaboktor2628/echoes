@@ -12,7 +12,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { getServerAuthSession } from "@/server/auth";
 
 export const metadata = {
-  title: "Echoes",
+  title: "Ekkos",
   description: "Social media app to share your friends quotes!",
 };
 
@@ -22,7 +22,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerAuthSession();
-  const defaultTheme = session?.user?.preferences?.theme || "system";
+  const defaultTheme = session?.user?.preferences?.theme ?? "system";
 
   return (
     <html lang="en" className={`${GeistSans.variable}`}>

@@ -14,6 +14,6 @@ export function SendMail({ options }: { options: Mail.Options }) {
   const { from, ...restOptions } = options;
   return transport.sendMail({
     ...restOptions,
-    from: `Echoes <${process.env.GMAIL_DOMAIN}>`,
+    from: `Ekkos <${process.env.GMAIL_DOMAIN}>`,
   });
 }
