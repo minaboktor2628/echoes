@@ -4,17 +4,19 @@ import { InfinitePostList } from "@/components/posts/InfinitePostList";
 import { ProfileImage } from "@/components/ProfileImage";
 import { getPlural } from "@/lib/utils";
 import { FollowButton } from "@/components/profile/FollowButton";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 
 const AUTHENTICATED_TABS = ["Recent", "Mentioned In", "Diary"] as const;
 const UNAUTHENTICATED_TABS = ["Recent", "Mentioned In"] as const;
 
 export default function Page({ params }: { params: { id: string } }) {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const { data: profile } = api.profile.getById.useQuery(params);
   const TABS =
-    status === "authenticated" ? AUTHENTICATED_TABS : UNAUTHENTICATED_TABS;
+    status === "authenticated" && session?.user.id === params.id
+      ? AUTHENTICATED_TABS
+      : UNAUTHENTICATED_TABS;
   const [selectedTab, setSelectedTab] =
     useState<(typeof TABS)[number]>("Recent");
   const posts = api.post.infiniteProfileFeed.useInfiniteQuery(
@@ -69,5 +71,3 @@ export default function Page({ params }: { params: { id: string } }) {
     </>
   );
 }
-
-function Posts() {}
