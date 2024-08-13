@@ -43,8 +43,8 @@ export function ProfileForm() {
     resolver: zodResolver(profileFormSchema),
     mode: "onChange",
     defaultValues: {
-      bio: session.data?.user.bio,
-      email: session.data?.user.email,
+      bio: session.data?.user.bio ?? "",
+      email: session.data?.user.email ?? "",
     },
   });
 
