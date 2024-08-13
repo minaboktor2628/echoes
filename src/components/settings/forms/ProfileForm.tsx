@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { profileFormSchema, ProfileFormValues } from "@/types/settings";
+import { profileFormSchema, type ProfileFormValues } from "@/types/settings";
 import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -43,8 +43,8 @@ export function ProfileForm() {
     resolver: zodResolver(profileFormSchema),
     mode: "onChange",
     defaultValues: {
-      bio: session.data?.user.bio,
-      email: session.data?.user.email!,
+      bio: session.data?.user.bio ?? "",
+      email: session.data?.user.email ?? "",
     },
   });
 
@@ -66,6 +66,7 @@ export function ProfileForm() {
               <FormControl>
                 <Input
                   type={"email"}
+                  className="text-base"
                   placeholder={"example@gmail.com"}
                   {...field}
                 />
@@ -86,7 +87,7 @@ export function ProfileForm() {
               <FormControl>
                 <Textarea
                   placeholder="Tell us a little bit about yourself"
-                  className="resize-none"
+                  className="resize-none text-base"
                   {...field}
                 />
               </FormControl>

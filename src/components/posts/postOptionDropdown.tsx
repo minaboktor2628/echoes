@@ -19,9 +19,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { useToast } from "@/components/ui/use-toast";
-import { UpdatePostForm } from "@/components/posts/UpdatePostForm";
+import { UpdatePostForm } from "@/components/posts/forms/UpdatePostForm";
 import { UpdateProps } from "@/types/post";
-import { TogglePostPrivate } from "@/components/posts/TogglePostPrivateForm";
+import { TogglePostPrivate } from "@/components/posts/forms/TogglePostPrivateForm";
 
 export const PostOptionDropdown = ({
   id,

@@ -6,6 +6,8 @@ import { getPlural } from "@/lib/utils";
 import { FollowButton } from "@/components/profile/FollowButton";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { UserDropDownMenu } from "@/components/profile/UserDropDownMenu";
+import Error from "next/error";
 
 const AUTHENTICATED_TABS = ["Recent", "Mentioned In", "Diary"] as const;
 const UNAUTHENTICATED_TABS = ["Recent", "Mentioned In"] as const;
@@ -13,18 +15,22 @@ const UNAUTHENTICATED_TABS = ["Recent", "Mentioned In"] as const;
 export default function Page({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
   const { data: profile } = api.profile.getById.useQuery(params);
+
   const TABS =
     status === "authenticated" && session?.user.id === params.id
       ? AUTHENTICATED_TABS
       : UNAUTHENTICATED_TABS;
   const [selectedTab, setSelectedTab] =
     useState<(typeof TABS)[number]>("Recent");
+
   const posts = api.post.infiniteProfileFeed.useInfiniteQuery(
     { id: params.id, tab: selectedTab },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
+  if (!profile) return <Error statusCode={404} />;
 
   return (
     <>
@@ -48,6 +54,11 @@ export default function Page({ params }: { params: { id: string } }) {
           userName={profile?.name}
           isFollowing={profile?.isFollowing}
         />
+        <UserDropDownMenu
+          key={params.id}
+          id={params.id}
+          name={profile.name}
+        ></UserDropDownMenu>
       </div>
       <div className={"flex"}>
         {TABS.map((tab) => (

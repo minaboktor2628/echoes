@@ -1,5 +1,5 @@
 "use client";
-import { PostForm } from "@/components/posts/MakePostForm";
+import { PostForm } from "@/components/posts/forms/MakePostForm";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfinitePostList } from "@/components/posts/InfinitePostList";
