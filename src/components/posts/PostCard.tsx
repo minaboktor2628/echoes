@@ -4,13 +4,14 @@ import Link from "next/link";
 import { ProfileImage } from "@/components/ProfileImage";
 import { UserHoverCard } from "@/components/posts/userHoverCard";
 import { PostOptionDropdown } from "@/components/posts/postOptionDropdown";
-import { HeartButton } from "@/components/posts/HeartButton";
+import { HeartButton } from "@/components/posts/buttons/HeartButton";
 import { ReactNode } from "react";
 import { CommentButton } from "@/components/comments/CommentButton";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { ShareButton } from "@/components/ShareButton";
 
 export const PostCard = ({
   id,
@@ -101,7 +102,12 @@ export const PostCard = ({
           )}
         </div>
         <div className={"whitespace-pre-wrap"}>{postContent}</div>
-        <div className={"flex"}>
+        <div className={"flex flex-row"}>
+          <ShareButton
+            key={id}
+            title={`Post By ${user.name}`}
+            url={`/posts/${id}`}
+          />
           <CommentButton commentCount={commentCount} onClick={onComment} />
           <HeartButton
             onClick={onLike}

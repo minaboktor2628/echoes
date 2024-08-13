@@ -148,7 +148,7 @@ export const postRouter = createTRPCRouter({
 
         for (const user of usersMentioned) {
           const emailTemplate = MentionedUserEmail({
-            mentionedByImg: ctx.session.user.image || "",
+            mentionedByImg: ctx.session.user.image ?? "",
             postLink: `/posts/${post.id}`,
             content: content,
             mentionedByUsername: ctx.session.user.name!,
@@ -192,7 +192,7 @@ export const postRouter = createTRPCRouter({
             where: { id },
             select: { mentions: { select: { id: true } } },
           })
-          .then((r) => r?.mentions.map((mention) => mention.id))) || [];
+          .then((r) => r?.mentions.map((mention) => mention.id))) ?? [];
 
       const newMentionedUsers = by.filter(
         (mention) => !oldPostMentions.includes(mention),
@@ -208,7 +208,7 @@ export const postRouter = createTRPCRouter({
 
         for (const user of usersMentioned) {
           const emailTemplate = MentionedUserEmail({
-            mentionedByImg: ctx.session.user.image || "",
+            mentionedByImg: ctx.session.user.image ?? "",
             postLink: `/posts/${post.id}`,
             content: content,
             mentionedByUsername: ctx.session.user.name!,

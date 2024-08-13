@@ -18,7 +18,7 @@ export const HeartButton = ({
 
   if (session.status === "unauthenticated")
     return (
-      <div className={"flex items-center gap-2 pl-2 text-gray-500"}>
+      <div className={"flex items-center gap-2 text-gray-500"}>
         <HeartIcon className="size-5 text-secondary" />
         <span>{likeCount}</span>
       </div>

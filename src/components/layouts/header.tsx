@@ -9,8 +9,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, Settings } from "lucide-react";
-import { RouteLink, useLinks } from "@/hooks/useLinks";
+import {
+  LogInIcon,
+  LogOutIcon,
+  PanelLeft,
+  Settings,
+  SettingsIcon,
+  User2Icon,
+  UserSquareIcon,
+} from "lucide-react";
+import { type RouteLink, useLinks } from "@/hooks/useLinks";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { ProfileImage } from "@/components/ProfileImage";
 import { IconHoverEffect } from "@/components/IconHoverEffect";
@@ -96,17 +104,41 @@ export const Header = () => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
+
           <DropdownMenuItem asChild>
-            <Link href={"/settings"}>Settings</Link>
+            <Link href={`/profile/${session?.user?.id}`}>
+              <User2Icon className={"mr-2 size-4"} />
+              <span>My Profile</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>Support</DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Link href={"/settings"}>
+              <SettingsIcon className={"mr-2 size-4"} />
+              <span>Settings</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <UserSquareIcon className={"mr-2 size-4"} />
+            <span>Support</span>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() =>
               status === "authenticated" ? signOut() : signIn("discord")
             }
           >
-            {status === "authenticated" ? "Logout" : "Login"}
+            {status === "authenticated" ? (
+              <>
+                <LogOutIcon className={"mr-2 size-4"} />
+                <span>Logout</span>
+              </>
+            ) : (
+              <>
+                <LogInIcon className={"mr-2 size-4"} />
+                <span>Login</span>
+              </>
+            )}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

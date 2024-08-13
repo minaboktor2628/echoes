@@ -1,16 +1,21 @@
 TODO:
   Features:
-    * [] Add spinner to buttons loading
+    * [] Delete comments on your posts
+    * [] Support button working
+    * [] Add go to profile on header
+    * [] Report posts
     * [] Send users in updated posts new email with different title
-    * [] Comments on posts
-    * [] Add posts/[id] route
-    * [] private notebook/quotes diary
-    * [] Have tracy redesign logo
+    * [x] Comments on posts
+    * [x] Add posts/[id] route
+    * [x] private notebook/quotes diary
+    * [x] Have tracy redesign logo
     * [] Make a credits to tracy on
     * [] subscribe button on friends posts
       * [] notification on friend's post
     * [] Ability to send email notifications
       * [x] notification on mentioned
+      * [] comment
+      * [] follow
     * [] Share button on posts
     * [] Share button profiles
     * [x] Tabs on profile to see posted vs mentioned
@@ -19,8 +24,6 @@ TODO:
       * [] group chats
       * [] sending photos? no bc of nudes
     * [] Private profiles
-      * [] users have to request to follow you, and you can accept
-      * [] private posts
     * [] Discord bot
       * [] command to auto upload quote
       * [] notification when a post is made

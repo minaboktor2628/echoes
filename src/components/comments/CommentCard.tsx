@@ -2,7 +2,7 @@ import { Comment } from "@/types/post";
 import { ProfileImage } from "@/components/ProfileImage";
 import Link from "next/link";
 import { UserHoverCard } from "@/components/posts/userHoverCard";
-import { HeartButton } from "@/components/posts/HeartButton";
+import { HeartButton } from "@/components/posts/buttons/HeartButton";
 import { api } from "@/trpc/react";
 import { replaceMentions } from "@/components/posts/PostCard";
 
