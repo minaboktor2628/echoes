@@ -2,6 +2,7 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -26,6 +27,15 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { SupportTicketForm } from "@/components/SupportTicketForm";
 function getLinks(
   Links: RouteLink[],
   status: "unauthenticated" | "authenticated" | "loading",
@@ -104,24 +114,35 @@ export const Header = () => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-
           <DropdownMenuItem asChild>
             <Link href={`/profile/${session?.user?.id}`}>
               <User2Icon className={"mr-2 size-4"} />
               <span>My Profile</span>
             </Link>
           </DropdownMenuItem>
-
           <DropdownMenuItem asChild>
             <Link href={"/settings"}>
               <SettingsIcon className={"mr-2 size-4"} />
               <span>Settings</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <UserSquareIcon className={"mr-2 size-4"} />
-            <span>Support</span>
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                  <UserSquareIcon className={"mr-2 size-4"} />
+                  <span>Support</span>
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Support Ticket</DialogTitle>
+                  <DialogDescription>Enter information below</DialogDescription>
+                </DialogHeader>
+                <SupportTicketForm />
+              </DialogContent>
+            </Dialog>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() =>
