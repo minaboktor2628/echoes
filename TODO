@@ -1,8 +1,8 @@
 TODO:
   Features:
     * [] Delete comments on your posts
-    * [] Support button working
-    * [] Add go to profile on header
+    * [x] Support button working
+    * [x] Add go to profile on header
     * [] Report posts
     * [] Send users in updated posts new email with different title
     * [x] Comments on posts
@@ -14,17 +14,15 @@ TODO:
       * [] notification on friend's post
     * [] Ability to send email notifications
       * [x] notification on mentioned
-      * [] comment
-      * [] follow
-    * [] Share button on posts
-    * [] Share button profiles
+      * [x] comment
+      * [x] follow
+    * [x] Share button on posts
+    * [x] Share button profiles
     * [x] Tabs on profile to see posted vs mentioned
     * [] Ability to remove yourself from a mentioned post
     * [] Direct message ?
-      * [] group chats
-      * [] sending photos? no bc of nudes
     * [] Private profiles
-    * [] Discord bot
+    * [] Discord bot ?
       * [] command to auto upload quote
       * [] notification when a post is made
     * [] Settings Page

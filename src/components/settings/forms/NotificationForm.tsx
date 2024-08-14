@@ -149,28 +149,28 @@ export function NotificationsForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="directMessageEmails"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Direct message emails
-                    </FormLabel>
-                    <FormDescription>
-                      Receive emails for when a friend messages you.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            {/*<FormField*/}
+            {/*  control={form.control}*/}
+            {/*  name="directMessageEmails"*/}
+            {/*  render={({ field }) => (*/}
+            {/*    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">*/}
+            {/*      <div className="space-y-0.5">*/}
+            {/*        <FormLabel className="text-base">*/}
+            {/*          Direct message emails*/}
+            {/*        </FormLabel>*/}
+            {/*        <FormDescription>*/}
+            {/*          Receive emails for when a friend messages you.*/}
+            {/*        </FormDescription>*/}
+            {/*      </div>*/}
+            {/*      <FormControl>*/}
+            {/*        <Switch*/}
+            {/*          checked={field.value}*/}
+            {/*          onCheckedChange={field.onChange}*/}
+            {/*        />*/}
+            {/*      </FormControl>*/}
+            {/*    </FormItem>*/}
+            {/*  )}*/}
+            {/*/>*/}
             <FormField
               control={form.control}
               name="securityEmails"

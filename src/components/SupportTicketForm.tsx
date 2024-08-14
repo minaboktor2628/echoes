@@ -13,9 +13,24 @@ import { api } from "@/trpc/react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 export const SupportTicketForm = () => {
-  const support = api.support.create.useMutation();
+  const support = api.support.create.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Your submitted a support ticket!",
+        description: "We will get back to you soon.",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Uh oh!",
+        description: "Something went wrong.",
+      });
+    },
+  });
 
   const form = useForm<SupportFormSchema>({
     resolver: zodResolver(supportFormSchema),

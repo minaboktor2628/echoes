@@ -14,7 +14,6 @@ export const CommentCard = ({
   id,
   content,
   likeCount,
-  // mentions,
 }: Comment) => {
   // const commentContent = replaceMentions(content, mentions);
   const trpcUtils = api.useUtils();

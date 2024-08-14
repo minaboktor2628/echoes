@@ -11,7 +11,7 @@ export const ProfileImage = ({
 }) => {
   return (
     <Avatar className={className}>
-      <AvatarImage src={src || undefined} />
+      <AvatarImage src={src ?? undefined} />
       <AvatarFallback>
         <User />
       </AvatarFallback>

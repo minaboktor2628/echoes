@@ -1,5 +1,5 @@
 import {
-  createTRPCContext,
+  type createTRPCContext,
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
@@ -15,22 +15,51 @@ import {
   togglePostPrivateSchema,
   updatePostSchema,
 } from "@/types/post";
-import { inferAsyncReturnType } from "@trpc/server";
-import { Prisma } from "@prisma/client";
+import { type inferAsyncReturnType } from "@trpc/server";
+import { type Prisma } from "@prisma/client";
 import { SendMail } from "@/lib/nodemailer";
 import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
 import { render } from "@react-email/components";
+import CommentTemplate from "../../../../emails/CommentTemplate";
 export const postRouter = createTRPCRouter({
   comment: protectedProcedure
     .input(makeCommentSchema)
     .mutation(async ({ ctx, input: { content, postId } }) => {
-      return ctx.db.comment.create({
+      const comment = await ctx.db.comment.create({
         data: {
           content,
           user: { connect: { id: ctx.session.user.id } },
           post: { connect: { id: postId } },
         },
       });
+
+      const postUser = await ctx.db.post.findUnique({
+        where: { id: postId },
+        select: { createdBy: true },
+      });
+
+      if (
+        postUser?.createdBy.socialEmails &&
+        postUser?.createdBy.id !== ctx.session.user.id
+      ) {
+        await SendMail({
+          options: {
+            to: postUser.createdBy.email,
+            subject: "A user made a comment on your post!",
+            html: render(
+              CommentTemplate({
+                postLink: `/posts/${postId}`,
+                commentByImg: ctx.session.user.image!,
+                commentById: ctx.session.user.id,
+                commentUsername: ctx.session.user.name!,
+                username: postUser.createdBy.name,
+              }),
+            ),
+          },
+        });
+      }
+
+      return comment;
     }),
 
   getById: publicProcedure
