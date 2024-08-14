@@ -35,6 +35,7 @@ export const profileFormSchema = z.object({
       required_error: "Please select an emails to reach you at.",
     })
     .email(),
+  accountVisibility: z.enum(["private", "public"]),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;

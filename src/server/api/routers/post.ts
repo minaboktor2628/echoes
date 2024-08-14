@@ -21,6 +21,7 @@ import { SendMail } from "@/lib/nodemailer";
 import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
 import { render } from "@react-email/components";
 import CommentTemplate from "../../../../emails/CommentTemplate";
+import { id } from "date-fns/locale";
 export const postRouter = createTRPCRouter({
   comment: protectedProcedure
     .input(makeCommentSchema)
@@ -66,7 +67,18 @@ export const postRouter = createTRPCRouter({
     .input(getPostByIdSchema)
     .query(async ({ ctx, input: { id } }) => {
       const post = await ctx.db.post.findUnique({
-        where: { id },
+        where: {
+          id,
+          OR: [
+            { createdBy: { accountVisibility: "public" } },
+            {
+              createdBy: {
+                accountVisibility: "private",
+                followers: { some: { id: ctx?.session?.user.id } },
+              },
+            },
+          ],
+        },
         select: {
           id: true,
           isDiary: true,
@@ -405,7 +417,18 @@ async function getInfiniteTweets({
   ctx: inferAsyncReturnType<typeof createTRPCContext>;
 }) {
   const posts = await ctx.db.post.findMany({
-    where,
+    where: {
+      ...where,
+      OR: [
+        { createdBy: { accountVisibility: "public" } },
+        {
+          createdBy: {
+            accountVisibility: "private",
+            followers: { some: { id: ctx?.session?.user.id } },
+          },
+        },
+      ],
+    },
     take: limit + 1,
     cursor: cursor ? { createdAt_id: cursor } : undefined,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
