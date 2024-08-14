@@ -3,7 +3,7 @@ import { ProfileForm } from "@/components/settings/forms/ProfileForm";
 import { getServerAuthSession } from "@/server/auth";
 
 export default async function SettingsProfilePage() {
-  const session = getServerAuthSession();
+  const session = await getServerAuthSession();
   if (!session) return;
   return (
     <div className="space-y-6">

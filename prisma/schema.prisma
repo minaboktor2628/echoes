@@ -51,6 +51,17 @@ model Comment {
   updatedAt DateTime @updatedAt
 }
 
+model Notification {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  title   String
+  content String
+
+  createdAt DateTime @default(now())
+}
+
 model User {
   id                String            @id @default(cuid())
   name              String            @unique
@@ -74,6 +85,8 @@ model User {
   posts    Post[]
   likes    Like[]
   mentions Post[] @relation("Mentions")
+
+  notification Notification[]
 
   followers User[] @relation("Followers")
   follows   User[] @relation("Followers")
