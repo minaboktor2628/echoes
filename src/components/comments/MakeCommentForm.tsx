@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { api } from "@/trpc/react";
-import { makeCommentSchema, MakeCommentSchema } from "@/types/post";
+import { makeCommentSchema, type MakeCommentSchema } from "@/types/post";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { ProfileImage } from "@/components/ProfileImage";
@@ -14,19 +14,39 @@ import React, { forwardRef } from "react";
 
 type props = {
   postId: string;
+  commentId?: string;
+  initialValues?: string;
+  type: "create" | "update";
 };
 
 export const MakeCommentForm = forwardRef<HTMLInputElement, props>(
-  ({ postId }, ref) => {
+  ({ postId, initialValues, type, commentId }, ref) => {
     const { data: session } = useSession();
     const { toast } = useToast();
     const trpcUtils = api.useUtils();
-    const comment = api.post.comment.useMutation({
-      onSuccess: (post) => {
+    const createMutation = api.comment.create.useMutation({
+      onSuccess: (comment) => {
         void trpcUtils.post.getById.invalidate();
         toast({
-          title: "You updates a comment!",
-          description: `"${post.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
+          title: "You made a comment!",
+          description: `"${comment.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
+        });
+      },
+      onError: () => {
+        toast({
+          variant: "destructive",
+          title: "Uh oh!",
+          description: "Something went wrong.",
+        });
+      },
+    });
+
+    const updateMutation = api.comment.update.useMutation({
+      onSuccess: (comment) => {
+        void trpcUtils.post.getById.invalidate();
+        toast({
+          title: "You updated a comment!",
+          description: `"${comment.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
         });
       },
       onError: () => {
@@ -41,13 +61,17 @@ export const MakeCommentForm = forwardRef<HTMLInputElement, props>(
     const form = useForm<MakeCommentSchema>({
       resolver: zodResolver(makeCommentSchema),
       defaultValues: {
-        content: "",
+        content: initialValues ?? "",
         postId,
       },
     });
 
     function onSubmit(values: MakeCommentSchema) {
-      comment.mutate(values);
+      if (type === "create") {
+        createMutation.mutate(values);
+      } else if (type === "update" && commentId) {
+        updateMutation.mutate({ ...values, commentId });
+      }
       form.reset();
     }
 
@@ -74,8 +98,11 @@ export const MakeCommentForm = forwardRef<HTMLInputElement, props>(
               </FormItem>
             )}
           />
-          <button disabled={comment.isPending} type="submit">
-            {comment.isPending ? (
+          <button
+            disabled={updateMutation.isPending || createMutation.isPending}
+            type="submit"
+          >
+            {updateMutation.isPending || createMutation.isPending ? (
               <LoadingSpinner />
             ) : (
               <SendIcon className={"size-6 hover:text-primary"} />
@@ -86,3 +113,5 @@ export const MakeCommentForm = forwardRef<HTMLInputElement, props>(
     );
   },
 );
+
+MakeCommentForm.displayName = "MakeCommentForm";

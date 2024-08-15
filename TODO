@@ -1,16 +1,17 @@
 TODO:
   Features:
     * [] Delete comments on your posts
+    * [] Delete your own comments
+    * [] edit your own comments
     * [] Block users
     * [] Notification page
-      * [] notification on comment
-      * [] notification on follow / req
-      * [] notification on mention
+      * [x] notification on comment
+      * [x] notification on follow / req
+      * [x] notification on mention
       * [] notification on subscribed post
     * [x] Support button working
     * [x] Add go to profile on header
     * [] Report posts
-    * [] Send users in updated posts new email with different title
     * [x] Comments on posts
     * [x] Add posts/[id] route
     * [x] private notebook/quotes diary
@@ -18,7 +19,7 @@ TODO:
     * [] Make a credits to tracy on
     * [] subscribe button on friends posts
       * [] notification on friend's post
-    * [] Ability to send email notifications
+    * [x] Ability to send email notifications
       * [x] notification on mentioned
       * [x] comment
       * [x] follow
@@ -27,7 +28,7 @@ TODO:
     * [x] Tabs on profile to see posted vs mentioned
     * [] Ability to remove yourself from a mentioned post
     * [] Direct message ?
-    * [] Private profiles
+    * [x] Private profiles
     * [] Discord bot ?
       * [] command to auto upload quote
       * [] notification when a post is made

@@ -49,7 +49,6 @@ export const postFormSchema = z.object({
 export const updatePostSchema = postFormSchema.extend({ id: z.string() });
 
 export const makeCommentSchema = z.object({
-  replyToId: z.string().optional(),
   postId: z.string(),
   content: z
     .string()

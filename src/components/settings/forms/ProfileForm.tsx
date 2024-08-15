@@ -85,8 +85,8 @@ export function ProfileForm() {
                 </SelectContent>
               </Select>
               <FormDescription>
-                You will be required to accept users follow requests in order
-                for them to see your posts.
+                If you have a private profile, you will be required to accept
+                users follow requests in order for them to see your posts.
               </FormDescription>
             </FormItem>
           )}

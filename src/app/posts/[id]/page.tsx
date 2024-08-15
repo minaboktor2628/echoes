@@ -44,7 +44,11 @@ export default function Page({ params }: { params: { id: string } }) {
       </Card>
       {status === "authenticated" && (
         <div className={"sticky bottom-0 "}>
-          <MakeCommentForm postId={post.id} ref={makeCommentRef} />
+          <MakeCommentForm
+            type={"create"}
+            postId={post.id}
+            ref={makeCommentRef}
+          />
         </div>
       )}
     </div>

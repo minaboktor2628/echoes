@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+export type ReportSchema = z.infer<typeof reportSchema>;
+export const reportSchema = z.object({
+  reason: z.string(),
+  type: z.string(),
+  id: z.string(),
+});
+
+export type SupportFormSchema = z.infer<typeof supportFormSchema>;
 export const supportFormSchema = z.object({
   title: z
     .string()
@@ -10,5 +18,3 @@ export const supportFormSchema = z.object({
     .min(3, { message: "Content must be at least 3 characters in length" })
     .max(255, { message: "Content must not exceed 255 characters" }),
 });
-
-export type SupportFormSchema = z.infer<typeof supportFormSchema>;
