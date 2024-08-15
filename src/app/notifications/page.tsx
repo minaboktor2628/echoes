@@ -19,7 +19,7 @@ const NotificationList = async ({ userId }: { userId: string }) => {
     );
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="flex w-full flex-col space-y-2">
       {notifications.notification.map((notification) => (
         <NotificationCard {...notification} key={notification.id} />
       ))}
