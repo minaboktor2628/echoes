@@ -7,8 +7,10 @@ import { useToast } from "@/components/ui/use-toast";
 export const FollowButton = ({
   userId,
   isFollowing,
+  accountVisibility,
   userName,
 }: {
+  accountVisibility: "private" | "public";
   userId: string;
   userName: string | null | undefined;
   isFollowing: boolean | undefined;
@@ -20,7 +22,7 @@ export const FollowButton = ({
     onSuccess: ({ addedFollow }) => {
       toast({
         title: "Success!",
-        description: `You ${addedFollow ? "followed" : "unfollowed"} ${userName}.`,
+        description: `You ${addedFollow} ${userName}.`,
       });
       void trpcUtils.profile.getById.invalidate();
     },
@@ -44,9 +46,15 @@ export const FollowButton = ({
     toggleFollow.mutate({ id: userId });
   }
 
-  function getButtonText(loading: boolean, following: boolean | undefined) {
+  function getButtonText(
+    loading: boolean,
+    following: boolean | undefined,
+    accountVisibility: "private" | "public",
+  ) {
     if (following) {
       return loading ? "Unfollowing..." : "Unfollow";
+    } else if (!following && accountVisibility === "private") {
+      return loading ? "Requesting..." : "Request follow";
     } else {
       return loading ? "Following..." : "Follow";
     }
@@ -55,10 +63,10 @@ export const FollowButton = ({
   return (
     <Button
       disabled={toggleFollow.isPending}
-      className={`${isFollowing ? "bg-accent" : "bg-primary"}`}
+      variant={isFollowing ? "secondary" : "default"}
       onClick={onToggle}
     >
-      {getButtonText(toggleFollow.isPending, isFollowing)}
+      {getButtonText(toggleFollow.isPending, isFollowing, accountVisibility)}
     </Button>
   );
 };

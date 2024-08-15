@@ -36,15 +36,16 @@ export const NotificationCard = ({
           </button>
         </DeleteNotificationForm>
       </AlertTitle>
-      <AlertDescription className={"flex flex-row justify-between"}>
+      <AlertDescription
+        className={"flex flex-row justify-between pt-2 text-center"}
+      >
         {content}
-        {/*<DeleteNotificationForm notificationId={id}>*/}
         <NotificationActionButton
+          notificationId={id}
           type={type}
           followReqUserId={followReqUserId}
           route={route}
         />
-        {/*</DeleteNotificationForm>*/}
       </AlertDescription>
     </Alert>
   );

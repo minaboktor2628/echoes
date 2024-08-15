@@ -33,6 +33,7 @@ export function PostForm() {
         description: `"${post.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
       });
       void trpcUtils.post.infiniteFeed.invalidate();
+      // void trpcUtils.post.infiniteFeed.invalidate();
     },
     onError: () => {
       toast({

@@ -2,11 +2,18 @@ import { api } from "@/trpc/react";
 import { useForm } from "react-hook-form";
 import { FollowBackSchema, followBackSchema } from "@/types/profile";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormField, FormItem } from "@/components/ui/form";
+import { Form, FormField } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 
-export const FollowBackButton = ({ id }: { id: string }) => {
+export const FollowBackButton = ({
+  notificationId,
+  id,
+}: {
+  id: string;
+  notificationId: string;
+}) => {
   const followBack = api.profile.acceptFollow.useMutation();
+  const notification = api.notifications.delete.useMutation();
   const form = useForm<FollowBackSchema>({
     resolver: zodResolver(followBackSchema),
     defaultValues: { id },
@@ -14,6 +21,7 @@ export const FollowBackButton = ({ id }: { id: string }) => {
 
   const onSubmit = (values: FollowBackSchema) => {
     followBack.mutate(values);
+    notification.mutate({ notificationId });
   };
 
   return (

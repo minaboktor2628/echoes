@@ -12,7 +12,7 @@ export const profileRouter = createTRPCRouter({
   toggleFollow: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input: { id }, ctx }) => {
-      let addedFollow: boolean;
+      let addedFollow: "requested to follow" | "followed" | "unfollowed";
       const currentUserId = ctx.session.user.id;
       const existingFollow = await ctx.db.user.findFirst({
         where: { id, followers: { some: { id: currentUserId } } },
@@ -35,7 +35,7 @@ export const profileRouter = createTRPCRouter({
             where: { id },
             data: { followers: { connect: { id: currentUserId } } },
           });
-          addedFollow = true;
+          addedFollow = "followed";
 
           await ctx.db.notification.create({
             data: {
@@ -65,8 +65,8 @@ export const profileRouter = createTRPCRouter({
               },
             });
           }
-        } else {
-          addedFollow = false;
+        } else if (toFollowUser?.accountVisibility === "private") {
+          addedFollow = "requested to follow";
           await ctx.db.notification.create({
             data: {
               user: { connect: { id: toFollowUser?.id } },
@@ -74,7 +74,7 @@ export const profileRouter = createTRPCRouter({
               content: `${ctx.session.user.name} requested to follow you.`,
               type: "followRequest",
               route: "/notifications",
-              followReqUserId: id,
+              followReqUserId: currentUserId,
             },
           });
 
@@ -102,16 +102,17 @@ export const profileRouter = createTRPCRouter({
           where: { id },
           data: { followers: { disconnect: { id: currentUserId } } },
         });
-        addedFollow = false;
+        addedFollow = "unfollowed";
       }
 
+      // @ts-ignore
       return { addedFollow };
     }),
 
   acceptFollow: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input: { id }, ctx }) => {
-      await ctx.db.user.update({
+      const user = await ctx.db.user.update({
         where: { id: ctx.session.user.id },
         data: { followers: { connect: { id } } },
       });
@@ -119,7 +120,7 @@ export const profileRouter = createTRPCRouter({
       await ctx.db.notification.create({
         data: {
           user: { connect: { id } },
-          title: `${ctx.session.user.name} accepted your follow!`,
+          title: `${user.name} accepted your follow!`,
           content: `You can now see ${ctx.session.user.name}'s posts.`,
           type: "generic",
           route: `/profile/${ctx.session.user.id}`,

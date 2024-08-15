@@ -44,12 +44,11 @@ export default function Page({ params }: { params: { id: string } }) {
             {profile?.followerCount}{" "}
             {getPlural(profile?.followerCount ?? 0, "Follower", "Followers")} -{" "}
             {profile?.followsCount} Following
-            {/*- {profile?.likeCount}{" "}*/}
-            {/*{getPlural(profile?.likeCount || 0, "Like", "Likes")}*/}
           </div>
-          <span className={"text-gray-300"}>{profile?.bio}</span>
+          <span className={"text-gray-500"}>{profile?.bio}</span>
         </div>
         <FollowButton
+          accountVisibility={profile.accountVisibility}
           userId={params.id}
           userName={profile?.name}
           isFollowing={profile?.isFollowing}
@@ -71,14 +70,21 @@ export default function Page({ params }: { params: { id: string } }) {
           </button>
         ))}
       </div>
-      <InfinitePostList
-        isMyProfile={profile?.isMyProfile}
-        posts={posts.data?.pages.flatMap((page) => page.posts)}
-        isError={posts.isError}
-        hasMore={posts.hasNextPage}
-        fetchNewPosts={posts.fetchNextPage}
-        isLoading={posts.isLoading}
-      />
+      {profile.accountVisibility === "private" && !profile.isFollowing ? (
+        <span className={"text-center text-xl"}>
+          This user&apos;s profile is private. They must accept your follow
+          request in order for you to be able to see their posts.{" "}
+        </span>
+      ) : (
+        <InfinitePostList
+          isMyProfile={profile?.isMyProfile}
+          posts={posts.data?.pages.flatMap((page) => page.posts)}
+          isError={posts.isError}
+          hasMore={posts.hasNextPage}
+          fetchNewPosts={posts.fetchNextPage}
+          isLoading={posts.isLoading}
+        />
+      )}
     </>
   );
 }
