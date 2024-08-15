@@ -14,7 +14,8 @@ export const NotificationCard = ({
   createdAt,
   followReqUserId,
   route,
-}: Notification) => {
+  onDelete,
+}: Notification & { onDelete: (id: string) => void }) => {
   let formattedDate = formatDistanceToNow(createdAt, { addSuffix: true });
 
   if (formattedDate.startsWith("about ")) {
@@ -30,7 +31,7 @@ export const NotificationCard = ({
           <span className={"text-gray-500"}> - </span>
           <span className={"text-gray-500"}>{formattedDate}</span>
         </div>
-        <DeleteNotificationForm notificationId={id}>
+        <DeleteNotificationForm onDelete={onDelete} notificationId={id}>
           <button type={"submit"} className={"m-0 p-0"}>
             <X />
           </button>
@@ -41,6 +42,7 @@ export const NotificationCard = ({
       >
         {content}
         <NotificationActionButton
+          onDelete={onDelete}
           notificationId={id}
           type={type}
           followReqUserId={followReqUserId}

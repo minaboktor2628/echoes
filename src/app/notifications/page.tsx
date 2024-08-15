@@ -1,15 +1,16 @@
 import { api } from "@/trpc/server";
 import { getServerAuthSession } from "@/server/auth";
 import { NotificationCard } from "@/components/notifications/NotificationCard";
+import { NotificationsList } from "@/components/notifications/NotificationsList";
 
 export default async function Page() {
   const session = await getServerAuthSession();
   if (!session) return null;
 
-  return <NotificationList userId={session.user.id} />;
+  return <Notifications userId={session.user.id} />;
 }
 
-const NotificationList = async ({ userId }: { userId: string }) => {
+const Notifications = async ({ userId }: { userId: string }) => {
   const notifications = await api.notifications.get({ userId });
   if (!notifications || notifications.notification.length === 0)
     return (
@@ -20,9 +21,7 @@ const NotificationList = async ({ userId }: { userId: string }) => {
 
   return (
     <div className="flex w-full flex-col space-y-2">
-      {notifications.notification.map((notification) => (
-        <NotificationCard {...notification} key={notification.id} />
-      ))}
+      <NotificationsList notifications={notifications.notification} />
     </div>
   );
 };

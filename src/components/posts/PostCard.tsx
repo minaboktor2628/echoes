@@ -5,13 +5,14 @@ import { ProfileImage } from "@/components/ProfileImage";
 import { UserHoverCard } from "@/components/posts/userHoverCard";
 import { PostOptionDropdown } from "@/components/posts/postOptionDropdown";
 import { HeartButton } from "@/components/posts/buttons/HeartButton";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { CommentButton } from "@/components/comments/CommentButton";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { ShareButton } from "@/components/ShareButton";
+import { formatDistanceToNow } from "date-fns";
 
 export const PostCard = ({
   id,
@@ -32,24 +33,57 @@ export const PostCard = ({
   isPostRoute: boolean;
   commentButtonOnCLick?: () => void;
 }) => {
+  const [localLikeCount, setLocalLikeCount] = useState(likeCount);
+  const [localLikedByMe, setLocalLikedByMe] = useState(likedByMe);
+
   const { status } = useSession();
   const router = useRouter();
   const postContent = replaceMentions(content, mentions);
-  const trpcUtils = api.useUtils();
+  const trpcUtils = api.useContext();
   const toggleLike = api.post.toggleLike.useMutation({
+    onMutate: async () => {
+      // Optimistically update
+      setLocalLikedByMe((prev) => !prev);
+      setLocalLikeCount((prev) => (localLikedByMe ? prev - 1 : prev + 1));
+    },
+    onError: (error) => {
+      // Revert on error
+      setLocalLikedByMe((prev) => !prev);
+      setLocalLikeCount((prev) => (localLikedByMe ? prev + 1 : prev - 1));
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update like status. Please try again.",
+      });
+    },
     onSuccess: async () => {
       await trpcUtils.post.infiniteFeed.invalidate();
-      await trpcUtils.post.getById.invalidate();
       await trpcUtils.post.infiniteProfileFeed.invalidate();
+      await trpcUtils.post.getById.invalidate();
       await trpcUtils.profile.getById.invalidate();
     },
   });
 
-  const DateTimeFormater = new Intl.DateTimeFormat(undefined, {
-    dateStyle: "short",
-  });
+  let formattedDate = formatDistanceToNow(createdAt, { addSuffix: true });
+
+  if (formattedDate.startsWith("about ")) {
+    formattedDate = formattedDate.replace("about ", "");
+  }
 
   const onLike = () => {
+    if (status !== "authenticated") {
+      toast({
+        variant: "destructive",
+        title: "You are not logged in.",
+        description: "You must be logged in to like posts",
+        action: (
+          <ToastAction altText={"Log in"} onClick={() => signIn("discord")}>
+            Log In
+          </ToastAction>
+        ),
+      });
+      return;
+    }
     toggleLike.mutate({ id });
   };
 
@@ -87,9 +121,7 @@ export const PostCard = ({
               {...user}
             />
             <span className={"text-gray-500"}> - </span>
-            <span className={"text-gray-500"}>
-              {DateTimeFormater.format(createdAt)}
-            </span>
+            <span className={"text-gray-500"}>{formattedDate}</span>
             {edited && <span className={"text-gray-500"}> - Edited</span>}
           </div>
           {isMyPost && (
@@ -112,8 +144,8 @@ export const PostCard = ({
           <HeartButton
             onClick={onLike}
             isLoading={toggleLike.isPending}
-            likeCount={likeCount}
-            likedByMe={likedByMe}
+            likeCount={localLikeCount}
+            likedByMe={localLikedByMe}
           />
         </div>
       </div>

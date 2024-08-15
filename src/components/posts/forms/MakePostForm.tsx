@@ -16,7 +16,7 @@ import { useSession } from "next-auth/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Mention, MentionsInput } from "react-mentions";
-import { ReactNode, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { ProfileImage } from "@/components/ProfileImage";
 import { Switch } from "@/components/ui/switch";
 
@@ -33,7 +33,6 @@ export function PostForm() {
         description: `"${post.content.replace(/@\[(.*?)]\(.*?\)/g, "@$1")}"`,
       });
       void trpcUtils.post.infiniteFeed.invalidate();
-      // void trpcUtils.post.infiniteFeed.invalidate();
     },
     onError: () => {
       toast({

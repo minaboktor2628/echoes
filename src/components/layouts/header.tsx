@@ -115,13 +115,25 @@ export const Header = () => {
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href={`/profile/${session?.user?.id}`}>
+            <Link
+              href={
+                status === "authenticated"
+                  ? `/profile/${session?.user?.id}`
+                  : "/api/auth/signin/discord"
+              }
+            >
               <User2Icon className={"mr-2 size-4"} />
               <span>My Profile</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href={"/settings"}>
+            <Link
+              href={
+                status === "authenticated"
+                  ? "/settings"
+                  : "/api/auth/signin/discord"
+              }
+            >
               <SettingsIcon className={"mr-2 size-4"} />
               <span>Settings</span>
             </Link>

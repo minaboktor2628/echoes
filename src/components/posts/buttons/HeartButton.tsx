@@ -14,15 +14,15 @@ export const HeartButton = ({
   likedByMe: boolean;
   isLoading: boolean;
 }) => {
-  const session = useSession();
-
-  if (session.status === "unauthenticated")
-    return (
-      <div className={"flex items-center gap-2 text-gray-500"}>
-        <HeartIcon className="size-5 text-secondary" />
-        <span>{likeCount}</span>
-      </div>
-    );
+  // const session = useSession();
+  //
+  // if (session.status === "unauthenticated")
+  //   return (
+  //     <div className={"flex items-center gap-2 text-gray-500"}>
+  //       <HeartIcon className="size-5 text-secondary" />
+  //       <span>{likeCount}</span>
+  //     </div>
+  //   );
 
   return (
     <button

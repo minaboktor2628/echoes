@@ -127,7 +127,7 @@ export const profileRouter = createTRPCRouter({
         },
       });
 
-      return { addedFollow: true };
+      return { name: user.name };
     }),
 
   getById: publicProcedure

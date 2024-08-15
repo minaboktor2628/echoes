@@ -9,8 +9,9 @@ export const NotificationActionButton = ({
   route,
   followReqUserId,
   type,
+  onDelete,
   notificationId,
-}: { notificationId: string } & Pick<
+}: { notificationId: string; onDelete: (id: string) => void } & Pick<
   Notification,
   "type" | "route" | "followReqUserId"
 >) => {
@@ -18,7 +19,11 @@ export const NotificationActionButton = ({
 
   if (followReqUserId) {
     return (
-      <FollowBackButton notificationId={notificationId} id={followReqUserId} />
+      <FollowBackButton
+        onDelete={onDelete}
+        notificationId={notificationId}
+        id={followReqUserId}
+      />
     );
   }
 
@@ -26,7 +31,10 @@ export const NotificationActionButton = ({
     <Button
       asChild
       type={"submit"}
-      onClick={() => notification.mutate({ notificationId })}
+      onClick={() => {
+        onDelete(notificationId);
+        notification.mutate({ notificationId });
+      }}
     >
       <Link href={route}>Go to {type}</Link>
     </Button>

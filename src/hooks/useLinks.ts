@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 export type RouteLink = {
   url: string;
-  access: string;
+  access: "guest" | "user";
   title: string;
   label: string;
   icon: ForwardRefExoticComponent<
@@ -31,7 +31,7 @@ export function useLinks() {
     Links.push(
       {
         url: `/profile/${user?.id}`,
-        access: "guest",
+        access: "user",
         label: "profile",
         title: "Profile",
         icon: User,

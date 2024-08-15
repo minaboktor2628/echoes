@@ -27,7 +27,9 @@ export const SideBar = () => {
           <Tooltip key={index}>
             <TooltipTrigger asChild>
               <Link
-                href={link.url}
+                href={
+                  link.access === "user" ? "/api/auth/signin/discord" : link.url
+                }
                 className={`flex h-9 w-9 items-center justify-center rounded-lg ${isActive(link.url) ? "bg-accent text-accent-foreground" : "text-muted-foreground"} transition-colors hover:text-primary md:h-8 md:w-8`}
               >
                 <link.icon className="h-5 w-5" />
