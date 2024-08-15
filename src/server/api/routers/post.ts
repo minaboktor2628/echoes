@@ -89,6 +89,7 @@ export const postRouter = createTRPCRouter({
                 followers: { some: { id: ctx?.session?.user.id } },
               },
             },
+            { createdBy: { id: ctx?.session?.user.id } },
           ],
         },
         select: {
@@ -494,6 +495,7 @@ async function getInfiniteTweets({
             followers: { some: { id: ctx?.session?.user.id } },
           },
         },
+        { createdBy: { id: ctx?.session?.user.id } },
       ],
     },
     take: limit + 1,
