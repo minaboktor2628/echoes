@@ -8,6 +8,11 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum AccountVisibility {
+  private
+  public
+}
+
 enum Role {
   user
   admin
@@ -46,18 +51,46 @@ model Comment {
   updatedAt DateTime @updatedAt
 }
 
+enum NotificationType {
+  follow
+  followRequest
+  comment
+  commentLike
+  mention
+  like
+  post
+  generic
+}
+
+model Notification {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  title   String
+  content String
+  type    NotificationType
+
+  route String
+
+  followReqUserId String?
+
+  createdAt DateTime @default(now())
+}
+
 model User {
-  id            String    @id @default(cuid())
-  name          String    @unique
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  role          Role      @default(user)
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  bio           String?   @default("This user does not have a bio yet.")
-  theme         Theme?    @default(system)
+  id                String            @id @default(cuid())
+  name              String            @unique
+  email             String            @unique
+  emailVerified     DateTime?
+  image             String?
+  role              Role              @default(user)
+  accounts          Account[]
+  sessions          Session[]
+  createdAt         DateTime          @default(now())
+  bio               String?           @default("This user does not have a bio yet.")
+  theme             Theme?            @default(system)
+  accountVisibility AccountVisibility @default(public)
 
   mentionEmails       Boolean? @default(true)
   communicationEmails Boolean? @default(true)
@@ -68,6 +101,8 @@ model User {
   posts    Post[]
   likes    Like[]
   mentions Post[] @relation("Mentions")
+
+  notification Notification[]
 
   followers User[] @relation("Followers")
   follows   User[] @relation("Followers")

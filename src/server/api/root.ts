@@ -4,6 +4,7 @@ import { userRouter } from "@/server/api/routers/users";
 import { profileRouter } from "@/server/api/routers/profile";
 import { settingsRoute } from "@/server/api/routers/settings";
 import { supportRoute } from "@/server/api/routers/support";
+import { notificationsRoute } from "@/server/api/routers/notifications";
 
 export const appRouter = createTRPCRouter({
   post: postRouter,
@@ -11,6 +12,7 @@ export const appRouter = createTRPCRouter({
   profile: profileRouter,
   settings: settingsRoute,
   support: supportRoute,
+  notifications: notificationsRoute,
 });
 
 // export type definition of API

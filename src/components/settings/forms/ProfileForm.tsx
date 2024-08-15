@@ -19,6 +19,13 @@ import { profileFormSchema, type ProfileFormValues } from "@/types/settings";
 import { useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function ProfileForm() {
   const session = useSession();
@@ -45,6 +52,7 @@ export function ProfileForm() {
     defaultValues: {
       bio: session.data?.user.bio ?? "",
       email: session.data?.user.email ?? "",
+      accountVisibility: session.data?.user.accountVisibility,
     },
   });
 
@@ -57,6 +65,32 @@ export function ProfileForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="accountVisibility"
+          render={({ field }) => (
+            <FormItem className="items-center justify-between">
+              <div>
+                <FormLabel>Profile Visibility</FormLabel>
+              </div>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your account visibility" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="private">Private</SelectItem>
+                  <SelectItem value="public">Public</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                You will be required to accept users follow requests in order
+                for them to see your posts.
+              </FormDescription>
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="email"

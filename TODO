@@ -1,6 +1,12 @@
 TODO:
   Features:
     * [] Delete comments on your posts
+    * [] Block users
+    * [] Notification page
+      * [] notification on comment
+      * [] notification on follow / req
+      * [] notification on mention
+      * [] notification on subscribed post
     * [x] Support button working
     * [x] Add go to profile on header
     * [] Report posts

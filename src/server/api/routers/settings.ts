@@ -8,13 +8,10 @@ import {
 export const settingsRoute = createTRPCRouter({
   profile: protectedProcedure
     .input(profileFormSchema)
-    .mutation(async ({ ctx, input: { bio, email } }) => {
+    .mutation(async ({ ctx, input: { accountVisibility, bio, email } }) => {
       return ctx.db.user.update({
         where: { id: ctx.session.user.id },
-        data: {
-          bio: bio,
-          email: email,
-        },
+        data: { bio, accountVisibility, email },
       });
     }),
 

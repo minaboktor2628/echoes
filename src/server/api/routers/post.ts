@@ -21,6 +21,7 @@ import { SendMail } from "@/lib/nodemailer";
 import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
 import { render } from "@react-email/components";
 import CommentTemplate from "../../../../emails/CommentTemplate";
+
 export const postRouter = createTRPCRouter({
   comment: protectedProcedure
     .input(makeCommentSchema)
@@ -37,6 +38,8 @@ export const postRouter = createTRPCRouter({
         where: { id: postId },
         select: { createdBy: true },
       });
+
+      if (!postUser) return comment;
 
       if (
         postUser?.createdBy.socialEmails &&
@@ -59,6 +62,16 @@ export const postRouter = createTRPCRouter({
         });
       }
 
+      await ctx.db.notification.create({
+        data: {
+          user: { connect: { id: postUser.createdBy.id } },
+          title: "You got a comment!",
+          content: `${ctx.session.user.name} commented on your post.`,
+          type: "comment",
+          route: `/posts/${postId}`,
+        },
+      });
+
       return comment;
     }),
 
@@ -66,7 +79,19 @@ export const postRouter = createTRPCRouter({
     .input(getPostByIdSchema)
     .query(async ({ ctx, input: { id } }) => {
       const post = await ctx.db.post.findUnique({
-        where: { id },
+        where: {
+          id,
+          OR: [
+            { createdBy: { accountVisibility: "public" } },
+            {
+              createdBy: {
+                accountVisibility: "private",
+                followers: { some: { id: ctx?.session?.user.id } },
+              },
+            },
+            { createdBy: { id: ctx?.session?.user.id } },
+          ],
+        },
         select: {
           id: true,
           isDiary: true,
@@ -117,6 +142,7 @@ export const postRouter = createTRPCRouter({
               name: true,
               id: true,
               image: true,
+              accountVisibility: true,
             },
           },
         },
@@ -143,6 +169,7 @@ export const postRouter = createTRPCRouter({
         createdAt: post.createdAt,
         likeCount: post._count.likes,
         commentCount: post._count.comments,
+        accountVisibility: post.createdBy.accountVisibility,
         user: post.createdBy,
         edited:
           post.updatedAt.toLocaleTimeString() !==
@@ -170,28 +197,40 @@ export const postRouter = createTRPCRouter({
       if (by.length > 0) {
         const usersMentioned = await ctx.db.user
           .findMany({
-            where: { id: { in: by }, mentionEmails: true },
-            select: { email: true, name: true },
+            where: { id: { in: by } },
+            select: { email: true, name: true, id: true, mentionEmails: true },
           })
           .then((users) => users.filter(Boolean));
 
         for (const user of usersMentioned) {
-          const emailTemplate = MentionedUserEmail({
-            mentionedByImg: ctx.session.user.image ?? "",
-            postLink: `/posts/${post.id}`,
-            content: content,
-            mentionedByUsername: ctx.session.user.name!,
-            postedDate: new Date(),
-            mentionedByEmail: ctx.session.user.email!,
-            mentionedById: ctx.session.user.id,
-            username: user.name,
-          });
+          if (user.mentionEmails) {
+            const emailTemplate = MentionedUserEmail({
+              mentionedByImg: ctx.session.user.image ?? "",
+              postLink: `/posts/${post.id}`,
+              content: content,
+              mentionedByUsername: ctx.session.user.name!,
+              postedDate: new Date(),
+              mentionedByEmail: ctx.session.user.email!,
+              mentionedById: ctx.session.user.id,
+              username: user.name,
+            });
 
-          await SendMail({
-            options: {
-              to: user.email,
-              subject: "You were mentioned!",
-              html: render(emailTemplate),
+            await SendMail({
+              options: {
+                to: user.email,
+                subject: "You were mentioned!",
+                html: render(emailTemplate),
+              },
+            });
+          }
+
+          await ctx.db.notification.create({
+            data: {
+              user: { connect: { id: user.id } },
+              title: "You were mentioned!",
+              content: `${ctx.session.user.name} mentioned you in a post.`,
+              type: "mention",
+              route: `/posts/${post.id}`,
             },
           });
         }
@@ -231,7 +270,7 @@ export const postRouter = createTRPCRouter({
         const usersMentioned = await ctx.db.user
           .findMany({
             where: { id: { in: newMentionedUsers }, mentionEmails: true },
-            select: { email: true, name: true },
+            select: { email: true, name: true, id: true },
           })
           .then((r) => r.filter(Boolean));
 
@@ -245,6 +284,16 @@ export const postRouter = createTRPCRouter({
             mentionedByEmail: ctx.session.user.email!,
             mentionedById: ctx.session.user.id,
             username: user.name,
+          });
+
+          await ctx.db.notification.create({
+            data: {
+              user: { connect: { id: user.id } },
+              title: "You were mentioned!",
+              content: `${ctx.session.user.name} mentioned you in a post.`,
+              type: "mention",
+              route: `/posts/${post.id}`,
+            },
           });
 
           await SendMail({
@@ -272,13 +321,27 @@ export const postRouter = createTRPCRouter({
     .input(toggleLikeSchema)
     .mutation(async ({ ctx, input: { id } }) => {
       const data = { postId: id, userId: ctx.session.user.id };
-
       const existingLike = await ctx.db.like.findUnique({
         where: { postId_userId: data },
+      });
+      const postedBy = await ctx.db.post.findUnique({
+        where: { id },
+        select: { createdBy: { select: { id: true } } },
       });
 
       if (existingLike == null) {
         await ctx.db.like.create({ data });
+        if (postedBy) {
+          await ctx.db.notification.create({
+            data: {
+              user: { connect: { id: postedBy.createdBy.id } },
+              title: "You got a like!",
+              content: `${ctx.session.user.name} liked your post.`,
+              type: "like",
+              route: `/posts/${id}`,
+            },
+          });
+        }
         return { addedLike: true };
       } else {
         await ctx.db.like.delete({ where: { postId_userId: data } });
@@ -295,14 +358,31 @@ export const postRouter = createTRPCRouter({
         where: { commentId_userId: data },
       });
 
+      const postedBy = await ctx.db.post.findUnique({
+        where: { id },
+        select: { createdBy: { select: { id: true } }, id: true },
+      });
+
       if (existingLike == null) {
         await ctx.db.commentLike.create({ data });
+        if (postedBy) {
+          await ctx.db.notification.create({
+            data: {
+              user: { connect: { id: postedBy.createdBy.id } },
+              title: "You got a like!",
+              content: `${ctx.session.user.name} liked your comment.`,
+              type: "commentLike",
+              route: `/post/${postedBy.id}`,
+            },
+          });
+        }
         return { addedLike: true };
       } else {
         await ctx.db.commentLike.delete({ where: { commentId_userId: data } });
         return { addedLike: true };
       }
     }),
+
   togglePostPrivate: protectedProcedure
     .input(togglePostPrivateSchema)
     .mutation(async ({ ctx, input: { postId } }) => {
@@ -405,7 +485,19 @@ async function getInfiniteTweets({
   ctx: inferAsyncReturnType<typeof createTRPCContext>;
 }) {
   const posts = await ctx.db.post.findMany({
-    where,
+    where: {
+      ...where,
+      OR: [
+        { createdBy: { accountVisibility: "public" } },
+        {
+          createdBy: {
+            accountVisibility: "private",
+            followers: { some: { id: ctx?.session?.user.id } },
+          },
+        },
+        { createdBy: { id: ctx?.session?.user.id } },
+      ],
+    },
     take: limit + 1,
     cursor: cursor ? { createdAt_id: cursor } : undefined,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],

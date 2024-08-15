@@ -20,28 +20,82 @@ export const profileRouter = createTRPCRouter({
       });
 
       if (existingFollow == null) {
-        const user = await ctx.db.user.update({
+        const toFollowUser = await ctx.db.user.findUnique({
           where: { id },
-          data: { followers: { connect: { id: currentUserId } } },
+          select: {
+            id: true,
+            accountVisibility: true,
+            socialEmails: true,
+            email: true,
+            name: true,
+          },
         });
-        addedFollow = true;
+        if (toFollowUser?.accountVisibility === "public") {
+          const user = await ctx.db.user.update({
+            where: { id },
+            data: { followers: { connect: { id: currentUserId } } },
+          });
+          addedFollow = true;
 
-        if (user.socialEmails) {
-          await SendMail({
-            options: {
-              to: user.email,
-              subject: "You got a follow!",
-              html: render(
-                FollowTemplate({
-                  followedById: ctx.session.user.id,
-                  followedByImg: ctx.session.user.image!,
-                  profileLink: `/profile/${ctx.session.user.id}`,
-                  followedUsername: ctx.session.user.name!,
-                  username: user.name,
-                }),
-              ),
+          await ctx.db.notification.create({
+            data: {
+              user: { connect: { id: toFollowUser?.id } },
+              title: "You got a follow!",
+              content: `${ctx.session.user.name} followed you.`,
+              type: "follow",
+              route: "/notifications",
             },
           });
+
+          if (user.socialEmails) {
+            await SendMail({
+              options: {
+                to: user.email,
+                subject: "You got a follow!",
+                html: render(
+                  FollowTemplate({
+                    reqOrFollow: "followed",
+                    followedById: ctx.session.user.id,
+                    followedByImg: ctx.session.user.image!,
+                    profileLink: `/profile/${ctx.session.user.id}`,
+                    followedUsername: ctx.session.user.name!,
+                    username: user.name,
+                  }),
+                ),
+              },
+            });
+          }
+        } else {
+          addedFollow = false;
+          await ctx.db.notification.create({
+            data: {
+              user: { connect: { id: toFollowUser?.id } },
+              title: "You got a follow request!",
+              content: `${ctx.session.user.name} requested to follow you.`,
+              type: "followRequest",
+              route: "/notifications",
+              followReqUserId: id,
+            },
+          });
+
+          if (toFollowUser?.socialEmails) {
+            await SendMail({
+              options: {
+                to: toFollowUser?.email,
+                subject: "You got a follow request!",
+                html: render(
+                  FollowTemplate({
+                    followedById: ctx.session.user.id,
+                    reqOrFollow: "requested to follow",
+                    followedByImg: ctx.session.user.image!,
+                    profileLink: `/notifications`,
+                    followedUsername: ctx.session.user.name!,
+                    username: toFollowUser?.name,
+                  }),
+                ),
+              },
+            });
+          }
         }
       } else {
         await ctx.db.user.update({
@@ -54,6 +108,27 @@ export const profileRouter = createTRPCRouter({
       return { addedFollow };
     }),
 
+  acceptFollow: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input: { id }, ctx }) => {
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { followers: { connect: { id } } },
+      });
+
+      await ctx.db.notification.create({
+        data: {
+          user: { connect: { id } },
+          title: `${ctx.session.user.name} accepted your follow!`,
+          content: `You can now see ${ctx.session.user.name}'s posts.`,
+          type: "generic",
+          route: `/profile/${ctx.session.user.id}`,
+        },
+      });
+
+      return { addedFollow: true };
+    }),
+
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input: { id }, ctx }) => {
@@ -61,6 +136,7 @@ export const profileRouter = createTRPCRouter({
         where: { id },
         select: {
           id: true,
+          accountVisibility: true,
           image: true,
           bio: true,
           name: true,
@@ -84,6 +160,7 @@ export const profileRouter = createTRPCRouter({
         name: profile.name,
         image: profile.image,
         bio: profile.bio,
+        accountVisibility: profile.accountVisibility,
         followerCount: profile._count.followers,
         followsCount: profile._count.follows,
         postCount: profile._count.posts,

@@ -22,6 +22,7 @@ interface FollowTemplateProps {
   followedByImg: string;
   profileLink: string;
   followedById: string;
+  reqOrFollow: "requested to follow" | "followed";
 }
 
 const baseUrl = process.env.NEXTAUTH_URL; //"https://echoes-mina.vercel.app";
@@ -31,9 +32,10 @@ export const FollowTemplate = ({
   followedUsername,
   followedById,
   profileLink,
+  reqOrFollow,
   followedByImg,
 }: FollowTemplateProps) => {
-  const previewText = `${followedUsername} followed you!`;
+  const previewText = `${followedUsername} ${reqOrFollow} you!`;
 
   return (
     <Html>
@@ -57,7 +59,7 @@ export const FollowTemplate = ({
               Hello <strong>{username},</strong>
             </Text>
             <Text className="text-[14px] leading-[24px] text-black">
-              <strong>{followedUsername}</strong> has followed you.
+              <strong>{followedUsername}</strong> has {reqOrFollow} you.
             </Text>
             <Section>
               <Row>
