@@ -22,7 +22,7 @@ export const NotificationCard = ({
   }
 
   return (
-    <Alert>
+    <Alert className={"w-full"}>
       <RocketIcon className="size-4" />
       <AlertTitle className={"flex flex-row justify-between"}>
         <div>
