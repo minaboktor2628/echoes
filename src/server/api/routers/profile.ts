@@ -105,7 +105,8 @@ export const profileRouter = createTRPCRouter({
         addedFollow = "unfollowed";
       }
 
-      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       return { addedFollow };
     }),
 
@@ -122,7 +123,7 @@ export const profileRouter = createTRPCRouter({
           user: { connect: { id } },
           title: `${user.name} accepted your follow!`,
           content: `You can now see ${ctx.session.user.name}'s posts.`,
-          type: "generic",
+          type: "profile",
           route: `/profile/${ctx.session.user.id}`,
         },
       });

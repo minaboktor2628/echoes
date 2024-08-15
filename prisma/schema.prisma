@@ -60,6 +60,7 @@ enum NotificationType {
   like
   post
   generic
+  profile
 }
 
 model Notification {

@@ -11,6 +11,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
+  BellIcon,
   LogInIcon,
   LogOutIcon,
   PanelLeft,
@@ -23,7 +24,7 @@ import { type RouteLink, useLinks } from "@/hooks/useLinks";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { ProfileImage } from "@/components/ProfileImage";
 import { IconHoverEffect } from "@/components/IconHoverEffect";
-import { useState } from "react";
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
@@ -36,6 +37,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
+import { api } from "@/trpc/react";
 function getLinks(
   Links: RouteLink[],
   status: "unauthenticated" | "authenticated" | "loading",
@@ -57,15 +59,28 @@ export const Header = () => {
   const [isLinkClicked, setIsLinkClicked] = useState(false);
   const pathname = usePathname();
   const Links = getLinks(links, status);
+  const { data: notifications } = api.notifications.get.useQuery({
+    userId: session?.user.id ?? "",
+  });
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
       <Sheet open={isLinkClicked} onOpenChange={setIsLinkClicked}>
         <SheetTrigger asChild>
-          <Button size="icon" variant="outline" className="sm:hidden">
-            <PanelLeft className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
+          <div className={"relative inline-block sm:hidden"}>
+            <Button size="icon" variant="outline" className="sm:hidden">
+              <PanelLeft className="h-5 w-5" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+            {status === "authenticated" &&
+              notifications != undefined &&
+              notifications?.notification.length > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-primary"></span>
+                </span>
+              )}
+          </div>
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs">
           <nav className="grid gap-6 text-lg font-medium">
@@ -76,7 +91,18 @@ export const Header = () => {
                 onClick={() => setIsLinkClicked(false)}
                 className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-primary"
               >
-                <link.icon className="h-5 w-5" />
+                <div className="relative inline-block">
+                  <link.icon className="h-5 w-5" />
+                  {link.icon === BellIcon &&
+                    status === "authenticated" &&
+                    notifications != undefined &&
+                    notifications?.notification.length > 0 && (
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-primary"></span>
+                      </span>
+                    )}
+                </div>
                 <span className="sr-only">{link.title}</span>
                 {link.title}
               </Link>

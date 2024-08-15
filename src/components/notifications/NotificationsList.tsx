@@ -26,7 +26,7 @@ export const NotificationsList = ({
     );
 
   return (
-    <div>
+    <div className={"flex flex-col space-y-2"}>
       {notifications.map((notification) => (
         <NotificationCard
           {...notification}
