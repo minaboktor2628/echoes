@@ -8,14 +8,16 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { X } from "lucide-react";
+// import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 export const DeleteNotificationForm = ({
   notificationId,
+  children,
 }: {
   notificationId: string;
-}) => {
+} & { children: React.ReactNode }) => {
   const notification = api.notifications.delete.useMutation();
   const router = useRouter();
   const form = useForm<DeleteNotificationSchema>({
@@ -37,9 +39,9 @@ export const DeleteNotificationForm = ({
           render={() => (
             <FormItem>
               <FormControl>
-                <button type={"submit"} className="m-0 p-0">
-                  <X />
-                </button>
+                {/*<button type={"submit"} className="m-0 p-0">*/}
+                {children}
+                {/*</button>*/}
               </FormControl>
             </FormItem>
           )}

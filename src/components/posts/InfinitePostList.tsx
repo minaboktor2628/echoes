@@ -22,6 +22,7 @@ export const InfinitePostList = ({
 }: InfinitePostListProps) => {
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <h1>Error...</h1>;
+
   if (posts === null || posts === undefined || posts.length === 0)
     return <NoTweets />;
 

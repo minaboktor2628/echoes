@@ -12,7 +12,15 @@ export const notificationsRoute = createTRPCRouter({
         where: { id: userId },
         select: {
           notification: {
-            select: { id: true, title: true, content: true, createdAt: true },
+            select: {
+              id: true,
+              title: true,
+              content: true,
+              createdAt: true,
+              followReqUserId: true,
+              route: true,
+              type: true,
+            },
             orderBy: { createdAt: "desc" },
           },
         },

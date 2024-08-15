@@ -67,6 +67,8 @@ export const postRouter = createTRPCRouter({
           user: { connect: { id: postUser.createdBy.id } },
           title: "You got a comment!",
           content: `${ctx.session.user.name} commented on your post.`,
+          type: "comment",
+          route: `/posts/${postId}`,
         },
       });
 
@@ -139,6 +141,7 @@ export const postRouter = createTRPCRouter({
               name: true,
               id: true,
               image: true,
+              accountVisibility: true,
             },
           },
         },
@@ -165,6 +168,7 @@ export const postRouter = createTRPCRouter({
         createdAt: post.createdAt,
         likeCount: post._count.likes,
         commentCount: post._count.comments,
+        accountVisibility: post.createdBy.accountVisibility,
         user: post.createdBy,
         edited:
           post.updatedAt.toLocaleTimeString() !==
@@ -224,6 +228,8 @@ export const postRouter = createTRPCRouter({
               user: { connect: { id: user.id } },
               title: "You were mentioned!",
               content: `${ctx.session.user.name} mentioned you in a post.`,
+              type: "mention",
+              route: `/posts/${post.id}`,
             },
           });
         }
@@ -284,6 +290,8 @@ export const postRouter = createTRPCRouter({
               user: { connect: { id: user.id } },
               title: "You were mentioned!",
               content: `${ctx.session.user.name} mentioned you in a post.`,
+              type: "mention",
+              route: `/posts/${post.id}`,
             },
           });
 
@@ -328,6 +336,8 @@ export const postRouter = createTRPCRouter({
               user: { connect: { id: postedBy.createdBy.id } },
               title: "You got a like!",
               content: `${ctx.session.user.name} liked your post.`,
+              type: "like",
+              route: `/posts/${id}`,
             },
           });
         }
@@ -349,7 +359,7 @@ export const postRouter = createTRPCRouter({
 
       const postedBy = await ctx.db.post.findUnique({
         where: { id },
-        select: { createdBy: { select: { id: true } } },
+        select: { createdBy: { select: { id: true } }, id: true },
       });
 
       if (existingLike == null) {
@@ -360,6 +370,8 @@ export const postRouter = createTRPCRouter({
               user: { connect: { id: postedBy.createdBy.id } },
               title: "You got a like!",
               content: `${ctx.session.user.name} liked your comment.`,
+              type: "commentLike",
+              route: `/post/${postedBy.id}`,
             },
           });
         }

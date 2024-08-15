@@ -51,6 +51,17 @@ model Comment {
   updatedAt DateTime @updatedAt
 }
 
+enum NotificationType {
+  follow
+  followRequest
+  comment
+  commentLike
+  mention
+  like
+  post
+  generic
+}
+
 model Notification {
   id     String @id @default(uuid())
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -58,6 +69,11 @@ model Notification {
 
   title   String
   content String
+  type    NotificationType
+
+  route String
+
+  followReqUserId String?
 
   createdAt DateTime @default(now())
 }
