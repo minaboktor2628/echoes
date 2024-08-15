@@ -22,11 +22,7 @@ export const FollowBackButton = ({ id }: { id: string }) => {
         <FormField
           name="id"
           control={form.control}
-          render={() => (
-            <Button className={"m-0 p-0 "} variant={"outline"} type={"submit"}>
-              Follow Back
-            </Button>
-          )}
+          render={() => <Button type={"submit"}>Accept</Button>}
         />
       </form>
     </Form>
