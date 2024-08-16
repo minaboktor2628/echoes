@@ -28,6 +28,7 @@ export const postRouter = createTRPCRouter({
       const post = await ctx.db.post.findUnique({
         where: {
           id,
+          createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds } },
           OR: [
             { createdBy: { accountVisibility: "public" } },
             {
@@ -403,6 +404,7 @@ async function getInfiniteTweets({
   const posts = await ctx.db.post.findMany({
     where: {
       ...where,
+      createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds } },
       OR: [
         { createdBy: { accountVisibility: "public" } },
         {

@@ -54,10 +54,11 @@ export default function Page({ params }: { params: { id: string } }) {
           isFollowing={profile?.isFollowing}
         />
         <UserDropDownMenu
-          key={params.id}
+          status={status}
+          isMyProfile={profile.isMyProfile}
           id={params.id}
           name={profile.name}
-        ></UserDropDownMenu>
+        />
       </div>
       <div className={"flex"}>
         {TABS.map((tab) => (

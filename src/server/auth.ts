@@ -23,6 +23,7 @@ declare module "next-auth" {
     user: {
       id: string;
       bio: string;
+      blockedUserIds: string[];
       accountVisibility: "private" | "public";
       preferences: UserPreferences;
     } & DefaultSession["user"];
@@ -30,6 +31,7 @@ declare module "next-auth" {
   interface User {
     // ...other properties
     bio: string;
+    blockedUserIds: string[];
     accountVisibility: "private" | "public";
     role: "user" | "admin";
     theme: "system" | "light" | "dark";
@@ -57,6 +59,7 @@ export const authOptions: NextAuthOptions = {
           accountVisibility: user.accountVisibility,
           preferences: {
             theme: user.theme,
+            blockedUserIds: user.blockedUserIds,
             mentionEmails: user.mentionEmails,
             communicationEmails: user.communicationEmails,
             marketingEmails: user.marketingEmails,

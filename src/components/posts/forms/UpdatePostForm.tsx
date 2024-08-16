@@ -12,15 +12,15 @@ import {
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
 import {
-  UpdatePostFormSchema,
+  type UpdatePostFormSchema,
   updatePostSchema,
-  UpdateProps,
+  type UpdateProps,
 } from "@/types/post";
 import { useSession } from "next-auth/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Mention, MentionsInput } from "react-mentions";
-import { ReactNode, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { ProfileImage } from "@/components/ProfileImage";
 import { Switch } from "@/components/ui/switch";
 

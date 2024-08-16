@@ -64,6 +64,7 @@ export const toggleLikeSchema = z.object({
 
 export type UpdateProps = Pick<Post, "id" | "content" | "mentions"> & {
   isDiary: boolean;
+  isMyPost: boolean;
 };
 
 export type PostFormSchema = z.infer<typeof postFormSchema>;

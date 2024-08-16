@@ -7,6 +7,9 @@ export const reportSchema = z.object({
   id: z.string(),
 });
 
+export type BlockUserSchema = z.infer<typeof blockUserSchema>;
+export const blockUserSchema = z.object({ id: z.string() });
+
 export type SupportFormSchema = z.infer<typeof supportFormSchema>;
 export const supportFormSchema = z.object({
   title: z
