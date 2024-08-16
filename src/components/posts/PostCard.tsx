@@ -124,14 +124,15 @@ export const PostCard = ({
             <span className={"text-gray-500"}>{formattedDate}</span>
             {edited && <span className={"text-gray-500"}> - Edited</span>}
           </div>
-
-          <PostOptionDropdown
-            isDiary={isDiary}
-            content={content}
-            isMyPost={isMyPost}
-            mentions={mentions}
-            id={id}
-          />
+          {status === "authenticated" && (
+            <PostOptionDropdown
+              isDiary={isDiary}
+              content={content}
+              isMyPost={isMyPost}
+              mentions={mentions}
+              id={id}
+            />
+          )}
         </div>
         <div className={"whitespace-pre-wrap"}>{postContent}</div>
         <div className={"flex flex-row"}>

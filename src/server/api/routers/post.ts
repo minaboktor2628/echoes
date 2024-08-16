@@ -371,6 +371,7 @@ export const postRouter = createTRPCRouter({
                   isDiary: false,
                   createdBy: {
                     followers: { some: { id: ctx.session.user.id } },
+                    id: { not: ctx?.session?.user.id },
                   },
                 },
         });
@@ -404,11 +405,17 @@ async function getInfiniteTweets({
   const posts = await ctx.db.post.findMany({
     where: {
       ...where,
-      createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds } },
+      // createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds ?? [] } },
       OR: [
-        { createdBy: { accountVisibility: "public" } },
         {
           createdBy: {
+            accountVisibility: "public",
+            id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
+          },
+        },
+        {
+          createdBy: {
+            id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
             accountVisibility: "private",
             followers: { some: { id: ctx?.session?.user.id } },
           },

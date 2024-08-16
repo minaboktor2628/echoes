@@ -1,9 +1,11 @@
 TODO:
   Features:
-    * [] Delete comments on your posts
-    * [] Delete your own comments
-    * [] edit your own comments
-    * [] Block users
+    * [x] Delete comments on your posts
+    * [x] Delete your own comments
+    * [x] edit your own comments
+    * [x] Block users
+    * [] Edit username
+    * [] Search function
     * [] Notification page
       * [x] notification on comment
       * [x] notification on follow / req
@@ -11,7 +13,7 @@ TODO:
       * [] notification on subscribed post
     * [x] Support button working
     * [x] Add go to profile on header
-    * [] Report posts
+    * [x] Report posts
     * [x] Comments on posts
     * [x] Add posts/[id] route
     * [x] private notebook/quotes diary
@@ -37,10 +39,10 @@ TODO:
       * [x] Email preferences
         * [x] Email on mention
         * [x] Email on friend posting
-        * [] Email on post comment
+        * [x] Email on post comment
       * [] Edit photo ? S3 buckets? where to host photo?
       * [x] Edit Bio
       * [] Add pronouns
   Bugs:
-    * [] Fix trpc slow invalidation - append post / like / etc to list instead
+    * [x] Fix trpc slow invalidation - append post / like / etc to list instead
     * [] Edited posts heuristic is bad

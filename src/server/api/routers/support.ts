@@ -52,7 +52,10 @@ export const supportRoute = createTRPCRouter({
 
       return ctx.db.user.update({
         where: { id: ctx.session.user.id },
-        data: { blockedUserIds: { set: [...user.blockedUserIds, id] } },
+        data: {
+          blockedUserIds: { set: [...user.blockedUserIds, id] },
+          follows: { disconnect: { id } },
+        },
       });
     }),
 });
