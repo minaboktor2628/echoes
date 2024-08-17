@@ -3,11 +3,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  ArrowUpLeft,
   Ellipsis,
   KeyIcon,
   MessageCircleWarning,
@@ -26,9 +28,11 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { useToast } from "@/components/ui/use-toast";
 import { UpdatePostForm } from "@/components/posts/forms/UpdatePostForm";
-import { UpdateProps } from "@/types/post";
+import { type UpdateProps } from "@/types/post";
 import { TogglePostPrivate } from "@/components/posts/forms/TogglePostPrivateForm";
 import { ReportForm } from "@/components/ReportForm";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 export const PostOptionDropdown = ({
   id,
@@ -37,6 +41,7 @@ export const PostOptionDropdown = ({
   isDiary,
   isMyPost,
 }: UpdateProps) => {
+  const isPostRoute = usePathname().startsWith("/posts");
   const trpcUtils = api.useUtils();
   const { toast } = useToast();
   const deletePost = api.post.delete.useMutation({
@@ -68,17 +73,25 @@ export const PostOptionDropdown = ({
       <DropdownMenuContent>
         <DropdownMenuLabel>Post Options</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {!isPostRoute && (
+          <Link href={`/posts/${id}`}>
+            <DropdownMenuItem>
+              <ArrowUpLeft className={"mr-2 size-4"} />
+              Go to post
+            </DropdownMenuItem>
+          </Link>
+        )}
         <DropdownMenuGroup>
           <Dialog>
             <DialogTrigger asChild>
               <button className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:cursor-pointer hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
                 <MessageCircleWarning className={"mr-2 size-4"} />
-                <span>Report Comment</span>
+                <span>Report Post</span>
               </button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Report a comment</DialogTitle>
+                <DialogTitle>Report a post</DialogTitle>
               </DialogHeader>
               <ReportForm id={id} type={"post"} />
             </DialogContent>

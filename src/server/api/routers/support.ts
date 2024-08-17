@@ -17,7 +17,7 @@ export const supportRoute = createTRPCRouter({
     .mutation(async ({ ctx, input: { content, title } }) => {
       return SendMail({
         options: {
-          to: process.env.GMAIL_DOMAIN,
+          to: process.env.ZOHO_DOMAIN,
           subject: `Support ticket: ${title}`,
           text: `User: ${ctx?.session?.user.name}\n
           id: ${ctx?.session?.user.id}\n\n\n
@@ -26,14 +26,14 @@ export const supportRoute = createTRPCRouter({
       });
     }),
 
-  report: protectedProcedure
+  report: publicProcedure
     .input(reportSchema)
     .mutation(async ({ ctx, input: { id, reason, type } }) => {
       return SendMail({
         options: {
-          to: process.env.GMAIL_DOMAIN,
+          to: process.env.ZOHO_DOMAIN,
           subject: `Report: ${type}`,
-          text: `${ctx.session.user.name}(${ctx.session.user.id} reported  with\n\nid: ${id}\n\nfor${reason})`,
+          text: `${ctx?.session?.user.name ?? "not logged in user"}(${ctx?.session?.user.id} reported  with\n\nid: ${id}\n\nfor${reason})`,
         },
       });
     }),
