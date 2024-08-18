@@ -9,6 +9,7 @@ import { api } from "@/trpc/react";
 import { useSession } from "next-auth/react";
 import { InfinitePostList } from "@/components/posts/InfinitePostList";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { UserHoverCard } from "@/components/posts/userHoverCard";
 
 const TABS = ["Users", "Posts"] as const;
 type Tabs = (typeof TABS)[number];
@@ -27,39 +28,43 @@ export default function Page({ params }: { params: { search: string } }) {
   if (users.isLoading || posts.isLoading) return <LoadingSpinner big />;
 
   return (
-    <div className="">
-      <div className={"pb-6 pl-10 pt-6"}>
+    <div>
+      <div className="pb-6 pl-10 pt-6">
         <h2 className="text-2xl font-bold tracking-tight">Search</h2>
         <p className="text-muted-foreground">Search for users or posts.</p>
       </div>
-      <Separator />
       <div>
-        <div className={"flex"}>
+        <div className="flex">
           {TABS.map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`flex-grow p-2 hover:bg-accent focus-visible:bg-gray-200 ${tab === selectedTab ? "border-b-4 border-primary font-bold" : ""}`}
+              className={`flex-grow p-2 hover:bg-accent focus-visible:bg-gray-200 ${
+                tab === selectedTab ? "border-b-4 border-primary font-bold" : ""
+              }`}
             >
               {tab}
             </button>
           ))}
         </div>
-        {selectedTab === "Users" && (
+        {selectedTab === "Users" ? (
           <div>
             {users.data?.users.length === 0 ? (
-              <h2 className={"text-grey-500 my-4 text-center text-2xl"}>
+              <h2 className="text-grey-500 my-4 text-center text-2xl">
                 No Users Found
               </h2>
             ) : (
               users?.data?.users.map((profile) => (
                 <div
-                  className={"flex items-center border-t p-6"}
+                  className="flex items-center border-t p-6"
                   key={profile.id}
                 >
                   <ProfileImage src={profile?.image} className={"size-14"} />
                   <div className={"ml-6 flex-grow"}>
-                    <h1 className={"text-lg font-bold"}>{profile?.name}</h1>
+                    <UserHoverCard
+                      className="-my-2 text-lg font-bold outline-none hover:underline focus-visible:underline"
+                      {...profile}
+                    />
                     <div className={"text-gray-500"}>
                       {profile?.postCount}{" "}
                       {getPlural(profile?.postCount ?? 0, "Post", "Posts")} -{" "}
@@ -89,12 +94,10 @@ export default function Page({ params }: { params: { search: string } }) {
               ))
             )}
           </div>
-        )}
-
-        {selectedTab === "Posts" && (
+        ) : (
           <div>
             {posts.data?.pages.flatMap((page) => page.posts).length === 0 ? (
-              <h2 className={"text-grey-500 my-4 text-center text-2xl"}>
+              <h2 className="text-grey-500 my-4 text-center text-2xl">
                 No Posts Found
               </h2>
             ) : (
@@ -111,4 +114,95 @@ export default function Page({ params }: { params: { search: string } }) {
       </div>
     </div>
   );
+
+  // return (
+  //   <div >
+  //     <div className={"pb-6 pl-10 pt-6"}>
+  //       <h2 className="text-2xl font-bold tracking-tight">Search</h2>
+  //       <p className="text-muted-foreground">Search for users or posts.</p>
+  //     </div>
+  //     <Separator />
+  //     <div>
+  //       <div className={"flex"}>
+  //         {TABS.map((tab) => (
+  //           <button
+  //             key={tab}
+  //             onClick={() => setSelectedTab(tab)}
+  //             className={`flex-grow p-2 hover:bg-accent focus-visible:bg-gray-200 ${tab === selectedTab ? "border-b-4 border-primary font-bold" : ""}`}
+  //           >
+  //             {tab}
+  //           </button>
+  //         ))}
+  //       </div>
+  //       {selectedTab === "Users" && (
+  //         <div>
+  //           {users.data?.users.length === 0 ? (
+  //             <h2 className={"text-grey-500 my-4 text-center text-2xl"}>
+  //               No Users Found
+  //             </h2>
+  //           ) : (
+  //             users?.data?.users.map((profile) => (
+  //               <div
+  //                 className={"flex items-center border-t p-6"}
+  //                 key={profile.id}
+  //               >
+  //                 <ProfileImage src={profile?.image} className={"size-14"} />
+  //                 <div className={"ml-6 flex-grow"}>
+  //                   <div>
+  //                     {/*<UserHoverCard*/}
+  //                     {/*    className="-my-2 font-semibold outline-none hover:underline focus-visible:underline"*/}
+  //                     {/*    {...profile}*/}
+  //                     {/*/>*/}
+  //                   <h1 className={"text-lg font-bold"}>{profile?.name}</h1>
+  //                   <div className={"text-gray-500"}>
+  //                     {profile?.postCount}{" "}
+  //                     {getPlural(profile?.postCount ?? 0, "Post", "Posts")} -{" "}
+  //                     {profile?.followerCount}{" "}
+  //                     {getPlural(
+  //                       profile?.followerCount ?? 0,
+  //                       "Follower",
+  //                       "Followers",
+  //                     )}{" "}
+  //                     - {profile?.followsCount} Following
+  //                   </div>
+  //                   <span className={"text-gray-500"}>{profile?.bio}</span>
+  //                 </div>
+  //                 <FollowButton
+  //                   accountVisibility={profile.accountVisibility}
+  //                   userId={profile.id}
+  //                   userName={profile?.name}
+  //                   isFollowing={profile?.isFollowing}
+  //                 />
+  //                 <UserDropDownMenu
+  //                   status={status}
+  //                   isMyProfile={profile.isMyProfile}
+  //                   id={profile.id}
+  //                   name={profile.name}
+  //                 />
+  //               </div>
+  //             ))
+  //           )}
+  //         </div>
+  //       )}
+  //
+  //       {selectedTab === "Posts" && (
+  //         <div>
+  //           {posts.data?.pages.flatMap((page) => page.posts).length === 0 ? (
+  //             <h2 className={"text-grey-500 my-4 text-center text-2xl"}>
+  //               No Posts Found
+  //             </h2>
+  //           ) : (
+  //             <InfinitePostList
+  //               posts={posts.data?.pages.flatMap((page) => page.posts)}
+  //               isError={posts.isError}
+  //               hasMore={posts.hasNextPage}
+  //               fetchNewPosts={posts.fetchNextPage}
+  //               isLoading={posts.isLoading}
+  //             />
+  //           )}
+  //         </div>
+  //       )}
+  //     </div>
+  //   </div>
+  // );
 }

@@ -156,7 +156,7 @@ export const profileRouter = createTRPCRouter({
         },
       });
 
-      if (profile?.followers == undefined) return;
+      if (profile == undefined) return;
 
       return {
         name: profile.name,
@@ -166,7 +166,7 @@ export const profileRouter = createTRPCRouter({
         followerCount: profile._count.followers,
         followsCount: profile._count.follows,
         postCount: profile._count.posts,
-        isMyProfile: ctx.session?.user.id === id,
+        isMyProfile: ctx?.session?.user.id === profile.id,
         isFollowing: profile.followers.length > 0,
       };
     }),
@@ -183,6 +183,7 @@ export const profileRouter = createTRPCRouter({
         },
         select: {
           id: true,
+          createdAt: true,
           accountVisibility: true,
           image: true,
           bio: true,
@@ -204,6 +205,7 @@ export const profileRouter = createTRPCRouter({
       return {
         users: profiles.map((profile) => ({
           name: profile.name,
+          createdAt: profile.createdAt,
           image: profile.image,
           bio: profile.bio,
           id: profile.id,

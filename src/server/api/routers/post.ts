@@ -23,23 +23,134 @@ import { MentionedUserEmail } from "../../../../emails/MentionedTemplate";
 import { render } from "@react-email/components";
 
 export const postRouter = createTRPCRouter({
+  // getById: publicProcedure
+  //   .input(getPostByIdSchema)
+  //   .query(async ({ ctx, input: { id } }) => {
+  //     const post = await ctx.db.post.findUnique({
+  //       where: {
+  //         id,
+  //         createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds } },
+  //         OR: [
+  //           { createdBy: { accountVisibility: "public" } },
+  //           {
+  //             createdBy: {
+  //               accountVisibility: "private",
+  //               followers: { some: { id: ctx?.session?.user.id } },
+  //             },
+  //           },
+  //           { createdBy: { id: ctx?.session?.user.id } },
+  //         ],
+  //       },
+  //       select: {
+  //         id: true,
+  //         isDiary: true,
+  //         content: true,
+  //         createdAt: true,
+  //         updatedAt: true,
+  //         _count: { select: { likes: true, comments: true } },
+  //         comments: {
+  //           select: {
+  //             id: true,
+  //             updatedAt: true,
+  //             user: {
+  //               select: {
+  //                 name: true,
+  //                 id: true,
+  //                 image: true,
+  //                 createdAt: true,
+  //                 bio: true,
+  //               },
+  //             },
+  //             content: true,
+  //             createdAt: true,
+  //             _count: { select: { likes: true } },
+  //             likes:
+  //               ctx.session?.user.id == undefined ||
+  //               ctx.session?.user.id == null
+  //                 ? false
+  //                 : { where: { userId: ctx.session?.user.id } },
+  //           },
+  //         },
+  //         likes:
+  //           ctx.session?.user.id == undefined || ctx.session?.user.id == null
+  //             ? false
+  //             : { where: { userId: ctx.session?.user.id } },
+  //         mentions: {
+  //           select: {
+  //             name: true,
+  //             id: true,
+  //             image: true,
+  //             createdAt: true,
+  //             bio: true,
+  //           },
+  //         },
+  //         createdBy: {
+  //           select: {
+  //             createdAt: true,
+  //             bio: true,
+  //             name: true,
+  //             id: true,
+  //             image: true,
+  //             accountVisibility: true,
+  //           },
+  //         },
+  //       },
+  //     });
+  //
+  //     if (!post || post.isDiary === true) return null;
+  //
+  //     return {
+  //       id: post.id,
+  //       comments: post.comments.map((comment) => ({
+  //         id: comment.id,
+  //         postId: post.id,
+  //         content: comment.content,
+  //         user: comment.user,
+  //         likeCount: comment._count.likes,
+  //         isMyPost: post.createdBy.id === ctx?.session?.user.id,
+  //         createdAt: comment.createdAt,
+  //         isMyComment: comment.user.id === ctx?.session?.user.id,
+  //         edited:
+  //           comment.createdAt.toLocaleTimeString() !==
+  //           comment.updatedAt.toLocaleTimeString(),
+  //         likedByMe: ctx.session == null ? false : comment.likes.length > 0,
+  //       })),
+  //       isDiary: post.isDiary,
+  //       isMyPost: post.createdBy.id === ctx?.session?.user.id,
+  //       content: post.content,
+  //       createdAt: post.createdAt,
+  //       likeCount: post._count.likes,
+  //       commentCount: post._count.comments,
+  //       accountVisibility: post.createdBy.accountVisibility,
+  //       user: post.createdBy,
+  //       edited:
+  //         post.updatedAt.toLocaleTimeString() !==
+  //         post.createdAt.toLocaleTimeString(),
+  //       likedByMe: ctx.session == null ? false : post.likes.length > 0,
+  //       mentions: post?.mentions,
+  //     };
+  //   }),
+
   getById: publicProcedure
     .input(getPostByIdSchema)
     .query(async ({ ctx, input: { id } }) => {
       const post = await ctx.db.post.findUnique({
         where: {
           id,
-          createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds } },
-          OR: [
-            { createdBy: { accountVisibility: "public" } },
-            {
-              createdBy: {
+          createdBy: {
+            id: { notIn: ctx?.session?.user.blockedUserIds },
+            OR: [
+              // Case 1: The post is created by the session user (always visible)
+              { id: ctx?.session?.user.id },
+              // Case 2: The post is from a public profile (visible to everyone)
+              { accountVisibility: "public" },
+              // Case 3: The post is from a private profile, but the session user is following them (visible)
+              {
                 accountVisibility: "private",
                 followers: { some: { id: ctx?.session?.user.id } },
               },
-            },
-            { createdBy: { id: ctx?.session?.user.id } },
-          ],
+            ],
+          },
         },
         select: {
           id: true,
@@ -318,34 +429,123 @@ export const postRouter = createTRPCRouter({
         },
       });
     }),
-
+  //
+  // infiniteProfileFeed: publicProcedure
+  //   .input(infiniteProfileListSchema)
+  //   .query(async ({ ctx, input: { id, tab, cursor, limit = 30 } }) => {
+  //     let where: Prisma.PostWhereInput;
+  //
+  //     switch (tab) {
+  //       case "Recent":
+  //         {
+  //           where = { createdById: id, isDiary: false };
+  //         }
+  //         break;
+  //       case "Mentioned In":
+  //         {
+  //           where = { mentions: { some: { id } }, isDiary: false };
+  //         }
+  //         break;
+  //       case "Diary":
+  //         {
+  //           if (ctx?.session?.user.id) {
+  //             where = { createdById: id, isDiary: true };
+  //           } else {
+  //             where = { createdById: id };
+  //           }
+  //         }
+  //         break;
+  //       default: {
+  //         where = { createdById: id };
+  //       }
+  //     }
+  //
+  //     return getInfiniteTweets({
+  //       where,
+  //       limit,
+  //       cursor,
+  //       ctx,
+  //     });
+  //   }),
   infiniteProfileFeed: publicProcedure
     .input(infiniteProfileListSchema)
     .query(async ({ ctx, input: { id, tab, cursor, limit = 30 } }) => {
-      let where: Prisma.PostWhereInput;
+      const sessionUserId = ctx.session?.user.id;
 
+      // Define the base where clause
+      let where: Prisma.PostWhereInput = {
+        createdById: id,
+        isDiary: false, // Default to non-diary posts
+      };
+
+      if (sessionUserId) {
+        // If the user is logged in
+        where.OR = [
+          {
+            createdBy: {
+              accountVisibility: "public",
+              id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
+            },
+          },
+          {
+            createdBy: {
+              accountVisibility: "private",
+              followers: { some: { id: sessionUserId } },
+            },
+          },
+          { createdBy: { id: sessionUserId } },
+        ];
+      } else {
+        // If the user is not logged in, show only public posts
+        where.createdBy = {
+          accountVisibility: "public",
+        };
+      }
+
+      // Adjust the where clause based on the selected tab
       switch (tab) {
-        case "Recent":
-          {
-            where = { createdById: id, isDiary: false };
+        case "Recent": {
+          where.isDiary = false;
+          break;
+        }
+        case "Mentioned In": {
+          // Apply the same visibility logic to the "Mentioned In" tab
+          where = {
+            mentions: { some: { id } },
+            isDiary: false,
+            OR: sessionUserId
+              ? [
+                  {
+                    createdBy: {
+                      accountVisibility: "public",
+                      id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
+                    },
+                  },
+                  {
+                    createdBy: {
+                      accountVisibility: "private",
+                      followers: { some: { id: sessionUserId } },
+                    },
+                  },
+                  { createdBy: { id: sessionUserId } },
+                ]
+              : [{ createdBy: { accountVisibility: "public" } }],
+          };
+          break;
+        }
+        case "Diary": {
+          if (sessionUserId !== id) {
+            where = { createdById: id, isDiary: true, OR: undefined };
+          } else {
+            where.isDiary = true;
           }
           break;
-        case "Mentioned In":
-          {
-            where = { mentions: { some: { id } }, isDiary: false };
-          }
-          break;
-        case "Diary":
-          {
-            if (ctx?.session?.user.id) {
-              where = { createdById: id, isDiary: true };
-            } else {
-              where = { createdById: id };
-            }
-          }
-          break;
+        }
         default: {
-          where = { createdById: id };
+          where = {
+            createdById: id,
+            OR: where.OR,
+          };
         }
       }
 
@@ -357,27 +557,118 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
+  // infiniteFeed: publicProcedure
+  //   .input(infiniteListSchema)
+  //   .query(
+  //     async ({ input: { limit = 30, cursor, onlyFollowing = false }, ctx }) => {
+  //       return getInfiniteTweets({
+  //         limit,
+  //         cursor,
+  //         ctx,
+  //         where:
+  //           ctx.session?.user.id == null || !onlyFollowing
+  //             ? { isDiary: false }
+  //             : {
+  //                 isDiary: false,
+  //                 createdBy: {
+  //                   followers: { some: { id: ctx.session.user.id } },
+  //                   id: { not: ctx?.session?.user.id },
+  //                 },
+  //               },
+  //       });
+  //     },
+  //   ),
   infiniteFeed: publicProcedure
     .input(infiniteListSchema)
     .query(
       async ({ input: { limit = 30, cursor, onlyFollowing = false }, ctx }) => {
+        const sessionUserId = ctx.session?.user.id;
+
+        // Define the base where clause
+        const where: Prisma.PostWhereInput = {
+          isDiary: false,
+        };
+
+        if (sessionUserId) {
+          // If the user is logged in
+          if (onlyFollowing) {
+            // Filter posts to show only those from users they follow
+            where.createdBy = {
+              followers: {
+                some: { id: sessionUserId },
+              },
+              id: { not: sessionUserId },
+            };
+          } else {
+            // Show posts from public accounts or those they follow, and their own posts
+            where.OR = [
+              {
+                createdBy: {
+                  accountVisibility: "public",
+                  id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
+                },
+              },
+              {
+                createdBy: {
+                  accountVisibility: "private",
+                  followers: { some: { id: sessionUserId } },
+                },
+              },
+              { createdBy: { id: sessionUserId } },
+            ];
+          }
+        } else {
+          // If the user is not logged in, show only public posts
+          where.createdBy = {
+            accountVisibility: "public",
+          };
+        }
+
         return getInfiniteTweets({
           limit,
           cursor,
           ctx,
-          where:
-            ctx.session?.user.id == null || !onlyFollowing
-              ? { isDiary: false }
-              : {
-                  isDiary: false,
-                  createdBy: {
-                    followers: { some: { id: ctx.session.user.id } },
-                    id: { not: ctx?.session?.user.id },
-                  },
-                },
+          where,
         });
       },
     ),
+
+  // infiniteSearchFeed: publicProcedure
+  //   .input(searchInfiniteListSchema)
+  //   .query(
+  //     async ({
+  //       input: { limit = 30, cursor, searchString, onlyFollowing = false },
+  //       ctx,
+  //     }) => {
+  //       const where: Prisma.PostWhereInput = {
+  //         AND: [
+  //           { isDiary: false }, // Add this line to exclude diary posts
+  //           {
+  //             OR: [
+  //               { content: { contains: searchString, mode: "insensitive" } },
+  //               {
+  //                 createdBy: {
+  //                   name: { contains: searchString, mode: "insensitive" },
+  //                   email: { contains: searchString, mode: "insensitive" },
+  //                 },
+  //               },
+  //             ],
+  //           },
+  //         ],
+  //       };
+  //
+  //       return getInfiniteTweets({
+  //         limit,
+  //         cursor,
+  //         ctx,
+  //         where,
+  //         createdByFilter: {
+  //           name: { contains: searchString, mode: "insensitive" },
+  //           email: { contains: searchString, mode: "insensitive" },
+  //         },
+  //       });
+  //     },
+  //   ),
 
   infiniteSearchFeed: publicProcedure
     .input(searchInfiniteListSchema)
@@ -386,17 +677,57 @@ export const postRouter = createTRPCRouter({
         input: { limit = 30, cursor, searchString, onlyFollowing = false },
         ctx,
       }) => {
+        // First, find users matching the search string, respecting privacy and blocking
+        const matchingUsers = await ctx.db.user.findMany({
+          where: {
+            OR: [
+              { name: { contains: searchString, mode: "insensitive" } },
+              { email: { contains: searchString, mode: "insensitive" } },
+            ],
+            AND: [
+              { id: { notIn: ctx?.session?.user.blockedUserIds ?? [] } },
+              {
+                OR: [
+                  { accountVisibility: "public" },
+                  { id: ctx?.session?.user.id },
+                  {
+                    accountVisibility: "private",
+                    followers: { some: { id: ctx?.session?.user.id } },
+                  },
+                ],
+              },
+            ],
+          },
+          select: { id: true },
+        });
+
+        const userIds = matchingUsers.map((user) => user.id);
+
         const where: Prisma.PostWhereInput = {
           AND: [
-            { isDiary: false }, // Add this line to exclude diary posts
+            { isDiary: false },
             {
               OR: [
                 { content: { contains: searchString, mode: "insensitive" } },
+                { createdById: { in: userIds } },
+              ],
+            },
+            {
+              OR: [
                 {
                   createdBy: {
-                    name: { contains: searchString, mode: "insensitive" },
+                    accountVisibility: "public",
+                    id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
                   },
                 },
+                {
+                  createdBy: {
+                    accountVisibility: "private",
+                    id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
+                    followers: { some: { id: ctx?.session?.user.id ?? "" } },
+                  },
+                },
+                { createdBy: { id: ctx?.session?.user.id } },
               ],
             },
           ],
@@ -429,7 +760,9 @@ export async function getInfiniteTweets({
   ctx,
   limit,
   cursor,
+  createdByFilter,
 }: {
+  createdByFilter?: Prisma.UserWhereInput;
   where?: Prisma.PostWhereInput;
   limit: number;
   cursor: { id: string; createdAt: Date } | undefined;
@@ -440,7 +773,7 @@ export async function getInfiniteTweets({
       AND: [
         where ? where : {},
         {
-          // createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds ?? [] } },
+          // ...where,
           OR: [
             {
               createdBy: {
@@ -450,8 +783,8 @@ export async function getInfiniteTweets({
             },
             {
               createdBy: {
-                id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
                 accountVisibility: "private",
+                id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
                 followers: { some: { id: ctx?.session?.user.id } },
               },
             },

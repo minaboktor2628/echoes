@@ -71,12 +71,9 @@ export default function Page({ params }: { params: { id: string } }) {
           </button>
         ))}
       </div>
-      {profile.accountVisibility === "private" && !profile.isFollowing ? (
-        <span className={"text-center text-xl"}>
-          This user&apos;s profile is private. They must accept your follow
-          request in order for you to be able to see their posts.{" "}
-        </span>
-      ) : (
+      {profile.isMyProfile ||
+      profile.accountVisibility === "public" ||
+      profile.isFollowing ? (
         <InfinitePostList
           isMyProfile={profile?.isMyProfile}
           posts={posts.data?.pages.flatMap((page) => page.posts)}
@@ -85,7 +82,30 @@ export default function Page({ params }: { params: { id: string } }) {
           fetchNewPosts={posts.fetchNextPage}
           isLoading={posts.isLoading}
         />
+      ) : (
+        <span className={"text-center text-xl"}>
+          This user&apos;s profile is private. They must accept your follow
+          request in order for you to be able to see their posts.
+        </span>
       )}
+
+      {/*{profile.accountVisibility === "private" &&*/}
+      {/*!profile.isFollowing &&*/}
+      {/*profile.name !== session?.user?.name ? (*/}
+      {/*  <span className={"text-center text-xl"}>*/}
+      {/*    This user&apos;s profile is private. They must accept your follow*/}
+      {/*    request in order for you to be able to see their posts.*/}
+      {/*  </span>*/}
+      {/*) : (*/}
+      {/*  <InfinitePostList*/}
+      {/*    isMyProfile={profile?.isMyProfile}*/}
+      {/*    posts={posts.data?.pages.flatMap((page) => page.posts)}*/}
+      {/*    isError={posts.isError}*/}
+      {/*    hasMore={posts.hasNextPage}*/}
+      {/*    fetchNewPosts={posts.fetchNextPage}*/}
+      {/*    isLoading={posts.isLoading}*/}
+      {/*  />*/}
+      {/*)}*/}
     </>
   );
 }
