@@ -4,8 +4,26 @@ import {
   notificationsFormSchema,
   profileFormSchema,
 } from "@/types/settings";
-
+import { z } from "zod";
 export const settingsRoute = createTRPCRouter({
+  unblockUser: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input: { id } }) => {
+      const currentBLockedUsers = ctx.session.user.blockedUserIds ?? [];
+      const updatedBlockedUsers = currentBLockedUsers.filter(
+        (blockedId) => blockedId !== id,
+      );
+
+      return ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { blockedUserIds: updatedBlockedUsers },
+      });
+    }),
+
   profile: protectedProcedure
     .input(profileFormSchema)
     .mutation(async ({ ctx, input: { accountVisibility, bio, email } }) => {

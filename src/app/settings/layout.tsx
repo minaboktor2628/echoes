@@ -23,6 +23,10 @@ const sidebarNavItems = [
     title: "Notifications",
     href: "/settings/notifications",
   },
+  {
+    title: "Blocked Users",
+    href: "/settings/blocked-users",
+  },
 ];
 
 interface SettingsLayoutProps {

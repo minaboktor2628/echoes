@@ -57,9 +57,9 @@ export const authOptions: NextAuthOptions = {
           ...session.user,
           id: user.id,
           accountVisibility: user.accountVisibility,
+          blockedUserIds: user.blockedUserIds,
           preferences: {
             theme: user.theme,
-            blockedUserIds: user.blockedUserIds,
             mentionEmails: user.mentionEmails,
             communicationEmails: user.communicationEmails,
             marketingEmails: user.marketingEmails,
