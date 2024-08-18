@@ -41,19 +41,14 @@ export const supportRoute = createTRPCRouter({
   block: protectedProcedure
     .input(blockUserSchema)
     .mutation(async ({ ctx, input: { id } }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { blockedUserIds: true },
-      });
-
-      if (!user) {
-        throw new Error("User not found");
+      const blockedUserIds = ctx.session.user.blockedUserIds || [];
+      if (blockedUserIds.includes(id)) {
+        throw new Error("User is already blocked");
       }
-
       return ctx.db.user.update({
         where: { id: ctx.session.user.id },
         data: {
-          blockedUserIds: { set: [...user.blockedUserIds, id] },
+          blockedUserIds: [...blockedUserIds, id],
           follows: { disconnect: { id } },
         },
       });
