@@ -53,6 +53,10 @@ export const userRouter = createTRPCRouter({
               mode: "insensitive",
             },
           },
+          select: {
+            name: true,
+            id: true,
+          },
           take: 10,
         })
         .then((users) =>

@@ -12,6 +12,10 @@ export const infiniteListSchema = z.object({
     .optional(),
 });
 
+export const searchInfiniteListSchema = infiniteListSchema.extend({
+  searchString: z.string(),
+});
+
 export const getPostByIdSchema = z.object({ id: z.string() });
 
 export const togglePostPrivateSchema = z.object({

@@ -11,6 +11,7 @@ import {
   infiniteProfileListSchema,
   makeCommentSchema,
   postFormSchema,
+  searchInfiniteListSchema,
   toggleLikeSchema,
   togglePostPrivateSchema,
   updatePostSchema,
@@ -377,6 +378,38 @@ export const postRouter = createTRPCRouter({
         });
       },
     ),
+
+  infiniteSearchFeed: publicProcedure
+    .input(searchInfiniteListSchema)
+    .query(
+      async ({
+        input: { limit = 30, cursor, searchString, onlyFollowing = false },
+        ctx,
+      }) => {
+        const where: Prisma.PostWhereInput = {
+          AND: [
+            { isDiary: false }, // Add this line to exclude diary posts
+            {
+              OR: [
+                { content: { contains: searchString, mode: "insensitive" } },
+                {
+                  createdBy: {
+                    name: { contains: searchString, mode: "insensitive" },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        return getInfiniteTweets({
+          limit,
+          cursor,
+          ctx,
+          where,
+        });
+      },
+    ),
 });
 
 function extractIds(input: string) {
@@ -391,7 +424,7 @@ function extractIds(input: string) {
   return results;
 }
 
-async function getInfiniteTweets({
+export async function getInfiniteTweets({
   where,
   ctx,
   limit,
@@ -404,23 +437,27 @@ async function getInfiniteTweets({
 }) {
   const posts = await ctx.db.post.findMany({
     where: {
-      ...where,
-      // createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds ?? [] } },
-      OR: [
+      AND: [
+        where ? where : {},
         {
-          createdBy: {
-            accountVisibility: "public",
-            id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
-          },
+          // createdBy: { id: { notIn: ctx?.session?.user.blockedUserIds ?? [] } },
+          OR: [
+            {
+              createdBy: {
+                accountVisibility: "public",
+                id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
+              },
+            },
+            {
+              createdBy: {
+                id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
+                accountVisibility: "private",
+                followers: { some: { id: ctx?.session?.user.id } },
+              },
+            },
+            { createdBy: { id: ctx?.session?.user.id } },
+          ],
         },
-        {
-          createdBy: {
-            id: { notIn: ctx?.session?.user.blockedUserIds ?? [] },
-            accountVisibility: "private",
-            followers: { some: { id: ctx?.session?.user.id } },
-          },
-        },
-        { createdBy: { id: ctx?.session?.user.id } },
       ],
     },
     take: limit + 1,

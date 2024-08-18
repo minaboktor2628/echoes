@@ -170,4 +170,50 @@ export const profileRouter = createTRPCRouter({
         isFollowing: profile.followers.length > 0,
       };
     }),
+
+  getBySearch: publicProcedure
+    .input(z.object({ searchString: z.string() }))
+    .query(async ({ input: { searchString }, ctx }) => {
+      const profiles = await ctx.db.user.findMany({
+        where: {
+          OR: [
+            { name: { contains: searchString, mode: "insensitive" } },
+            { email: { contains: searchString, mode: "insensitive" } },
+          ],
+        },
+        select: {
+          id: true,
+          accountVisibility: true,
+          image: true,
+          bio: true,
+          name: true,
+          _count: {
+            select: {
+              followers: true,
+              follows: true,
+              posts: true,
+            },
+          },
+          followers:
+            ctx.session?.user.id == null
+              ? undefined
+              : { where: { id: ctx.session.user.id } },
+        },
+      });
+
+      return {
+        users: profiles.map((profile) => ({
+          name: profile.name,
+          image: profile.image,
+          bio: profile.bio,
+          id: profile.id,
+          accountVisibility: profile.accountVisibility,
+          followerCount: profile._count.followers,
+          followsCount: profile._count.follows,
+          postCount: profile._count.posts,
+          isMyProfile: ctx.session?.user.id === profile.id,
+          isFollowing: profile.followers.length > 0,
+        })),
+      };
+    }),
 });

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { Separator } from "@/components/ui/separator";
-import { SidebarNav } from "@/components/settings/SidebarNav";
+import { SidebarNav } from "@/components/SidebarNav";
 import React from "react";
 import { getServerAuthSession } from "@/server/auth";
 
@@ -37,7 +37,10 @@ export default async function SettingsLayout({
   children,
 }: SettingsLayoutProps) {
   const session = await getServerAuthSession();
-  if (!session) return <h1>Please log in to see the settings page</h1>;
+  if (!session)
+    return (
+      <h1 className={"text-center"}>Please log in to see the settings page</h1>
+    );
 
   return (
     <div className=" space-y-6 p-10 pb-16 ">

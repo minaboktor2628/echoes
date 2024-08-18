@@ -26,7 +26,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { ProfileImage } from "@/components/ProfileImage";
 import { IconHoverEffect } from "@/components/IconHoverEffect";
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import {
@@ -56,6 +56,7 @@ function getLinks(
   return links;
 }
 export const Header = () => {
+  const [searchValue, setSearchValue] = useState("");
   const { data: session, status } = useSession();
   const { Links: links } = useLinks();
   const [isLinkClicked, setIsLinkClicked] = useState(false);
@@ -64,7 +65,7 @@ export const Header = () => {
   const { data: notifications } = api.notifications.get.useQuery({
     userId: session?.user.id ?? "",
   });
-
+  const router = useRouter();
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
       <Sheet open={isLinkClicked} onOpenChange={setIsLinkClicked}>
@@ -119,15 +120,23 @@ export const Header = () => {
           </IconHoverEffect>
         </Link>
       )}
-      {/*<h1 className={"text-center text-xl font-bold"}>{currentPath}</h1>*/}
-      {/*<div className="relative ml-auto flex-1 md:grow-0">*/}
-      {/*  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />*/}
-      {/*  <Input*/}
-      {/*    type="search"*/}
-      {/*    placeholder="Search..."*/}
-      {/*    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"*/}
-      {/*  />*/}
-      {/*</div>*/}
+      <div className="relative ml-auto flex-1 md:grow-0">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            router.push(`/search/${searchValue}`);
+          }}
+        >
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            type="search"
+            placeholder="Search..."
+            className="w-full rounded-lg bg-background pl-8 text-base md:w-[200px] lg:w-[336px]"
+          />
+        </form>
+      </div>
       {/*<ModeToggle />*/}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
